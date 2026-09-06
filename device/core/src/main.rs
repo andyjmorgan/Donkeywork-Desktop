@@ -1,7 +1,8 @@
 use dwdesktop_core::{
-    backend::Unavailable,
+    backend::{Backend, Unavailable},
     core::{Core, Policy},
     server::{Server, effective_uid},
+    x11_adapter::X11Adapter,
 };
 use serde::Deserialize;
 use std::{os::unix::fs::MetadataExt, path::PathBuf};
@@ -13,6 +14,18 @@ struct Config {
     socket_path: PathBuf,
     worker_id: Uuid,
     policies: Vec<Policy>,
+    #[serde(default)]
+    backend: BackendConfig,
+}
+
+#[derive(Default, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+enum BackendConfig {
+    #[default]
+    Unavailable,
+    X11 {
+        display: Option<String>,
+    },
 }
 
 #[tokio::main]
@@ -36,12 +49,19 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err("unsafe configuration".into());
     }
     let config: Config = serde_json::from_slice(&std::fs::read(&args[2])?)?;
-    let core = Core::new(config.worker_id, config.policies, Box::new(Unavailable))
-        .map_err(std::io::Error::other)?;
+    let backend: Box<dyn Backend> = match config.backend {
+        BackendConfig::Unavailable => Box::new(Unavailable),
+        BackendConfig::X11 { display } => {
+            Box::new(X11Adapter::connect(display).map_err(std::io::Error::other)?)
+        }
+    };
+    let core =
+        Core::new(config.worker_id, config.policies, backend).map_err(std::io::Error::other)?;
     let server = Server::bind(&config.socket_path, core)?;
     let (sender, receiver) = tokio::sync::watch::channel(false);
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
     tokio::spawn(async move {
-        let _ = tokio::signal::ctrl_c().await;
+        tokio::select! { _ = tokio::signal::ctrl_c() => {}, _ = terminate.recv() => {} }
         let _ = sender.send(true);
     });
     server.run(receiver).await?;
