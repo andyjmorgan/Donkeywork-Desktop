@@ -2,11 +2,11 @@
 
 ## Outcome and ownership
 
-Write a bounded design/backlog for capabilities after M1. Own only `docs/future/`; branch `work/wp08-future-design`, separate worktree. This package produces no implementation or deployment and does not block M1.
+Write a bounded design/backlog for capabilities after M1a/M1b. Own only `docs/future/`; branch `work/wp08-future-design`, separate worktree. This package produces no implementation or deployment and does not block either milestone. M1a is local Rust daemon plus CLI; M1b adds browser streaming, .NET and Keycloak. Remote CLI OAuth/HTTP access remains a separately scoped future design, not an M1a gate.
 
 ## Scope
 
-- Describe moving the broker from the device to attic while retaining device/session boundaries established in `contracts/` v0.1.0 draft.
+- Describe moving the M1b broker from the device to attic while retaining device/session boundaries. Use the current reviewed contract SHA, including `contracts/local-cli.md` draft v0.2.0; do not treat the local CLI profile as a ready remote API or expose raw broker IPC to clients.
 - Specify proposed enrollment, device identity rotation/revocation, heartbeat freshness, authorization and fleet presence semantics for attic/office nodes, minigpu and Spark. Unknown inventory/capabilities must remain explicit.
 - Describe MCP observe/input/resize tooling operating on the same desktop as the human viewer, with serialized actions and human takeover.
 - Describe a desktop pod runtime for DonkeyWork-Sandbox: shared display/browser context, lifecycle, isolation, display resize and explicit persistence.

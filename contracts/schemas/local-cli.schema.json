@@ -1,0 +1,1968 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://donkeywork.dev/desktop/contracts/0.2.0/local-cli.schema.json",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "counter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positive": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096
+    },
+    "display": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "displayId",
+        "width",
+        "height",
+        "topologyRevision",
+        "cursorEmbedded",
+        "canResize",
+        "availableResolutions"
+      ],
+      "properties": {
+        "displayId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "topologyRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "cursorEmbedded": {
+          "type": "boolean"
+        },
+        "canResize": {
+          "type": "boolean"
+        },
+        "availableResolutions": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4096
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.resumed"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "lastAcceptedInputSequence",
+            "lastResizeSequence",
+            "latestOutputSequence"
+          ],
+          "properties": {
+            "terminalId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "lastAcceptedInputSequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "lastResizeSequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "latestOutputSequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "describe"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "describe.result"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "workerId",
+            "peerUid",
+            "osAccountProfile",
+            "permissions",
+            "displays"
+          ],
+          "properties": {
+            "workerId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "peerUid": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "osAccountProfile": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "permissions": {
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 7,
+              "items": {
+                "enum": [
+                  "desktop.view",
+                  "desktop.control",
+                  "clipboard.read",
+                  "clipboard.write",
+                  "terminal.open",
+                  "terminal.input",
+                  "desktop.resize"
+                ]
+              }
+            },
+            "displays": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "$ref": "#/$defs/display"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "session.open"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "session.opened"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "const": "ready"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "session.close"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "control.acquire"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "control.granted"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "validForMs"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "validForMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 45000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "control.renew"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "control.release"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "screenshot.request"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "displayId",
+            "includeCursor"
+          ],
+          "properties": {
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "includeCursor": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "screenshot.result"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "snapshotId",
+            "displayId",
+            "topologyRevision",
+            "width",
+            "height",
+            "format",
+            "pixelFormat",
+            "cursorEmbedded",
+            "captureTimeUs",
+            "payloadBytes"
+          ],
+          "properties": {
+            "snapshotId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "format": {
+              "const": "png"
+            },
+            "pixelFormat": {
+              "const": "rgba8"
+            },
+            "cursorEmbedded": {
+              "type": "boolean"
+            },
+            "captureTimeUs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "payloadBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 67108864
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "input.pointer"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "snapshotId",
+            "displayId",
+            "topologyRevision",
+            "inputSequence",
+            "x",
+            "y",
+            "action",
+            "button"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "snapshotId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "inputSequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "x": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "y": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "action": {
+              "enum": [
+                "move",
+                "down",
+                "up",
+                "click"
+              ]
+            },
+            "button": {
+              "enum": [
+                "none",
+                "left",
+                "middle",
+                "right"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "input.key"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "snapshotId",
+            "displayId",
+            "topologyRevision",
+            "inputSequence",
+            "usage",
+            "action"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "snapshotId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "inputSequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "usage": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 255
+            },
+            "action": {
+              "enum": [
+                "down",
+                "up"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "input.text"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "snapshotId",
+            "displayId",
+            "topologyRevision",
+            "inputSequence",
+            "text"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "snapshotId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "inputSequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 16384
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "input.reset"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "inputSequence"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "inputSequence": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "display.resize"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "leaseId",
+            "displayId",
+            "topologyRevision",
+            "width",
+            "height"
+          ],
+          "properties": {
+            "leaseId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "display.resize.result"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "displayId",
+            "status",
+            "width",
+            "height",
+            "topologyRevision",
+            "reason"
+          ],
+          "properties": {
+            "displayId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "status": {
+              "enum": [
+                "applied",
+                "rejected"
+              ]
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4096
+            },
+            "topologyRevision": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "reason": {
+              "enum": [
+                "none",
+                "unsupported_mode",
+                "os_failed",
+                "rollback_failed"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.open"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rows",
+            "cols"
+          ],
+          "properties": {
+            "rows": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "cols": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.opened"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "rows",
+            "cols"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "rows": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "cols": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.input"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "inputSequence",
+            "bytesBase64"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "inputSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            },
+            "bytesBase64": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 43692,
+              "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.inputAck"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "inputSequence"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "inputSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.output"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "outputSequence",
+            "bytesBase64"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "outputSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            },
+            "bytesBase64": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 43692,
+              "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.resize"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "resizeSequence",
+            "rows",
+            "cols"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "resizeSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            },
+            "rows": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "cols": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.resume"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "lastOutputSequence"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "lastOutputSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/counter"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.gap"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "earliestAvailableSequence",
+            "latestSequence"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "earliestAvailableSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            },
+            "latestSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/positiveCounter"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.exit"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId",
+            "exitCode",
+            "signal",
+            "finalOutputSequence"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "exitCode": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 255
+            },
+            "signal": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "maximum": 64
+            },
+            "finalOutputSequence": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/counter"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "exitCode": {
+                  "type": "integer"
+                },
+                "signal": {
+                  "type": "null"
+                }
+              }
+            },
+            {
+              "properties": {
+                "exitCode": {
+                  "type": "null"
+                },
+                "signal": {
+                  "type": "integer"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "terminal.close"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "terminalId"
+          ],
+          "properties": {
+            "terminalId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "sessionId",
+        "sessionEpoch",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "ack"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionEpoch": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "requestMessageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop.local"
+        },
+        "version": {
+          "const": "0.2.0"
+        },
+        "type": {
+          "const": "error"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "retryable"
+          ],
+          "properties": {
+            "code": {
+              "enum": [
+                "unsupported_version",
+                "invalid_argument",
+                "unauthorized",
+                "forbidden",
+                "expired",
+                "replayed_grant",
+                "control_conflict",
+                "stale_epoch",
+                "stale_topology",
+                "stale_sequence",
+                "not_found",
+                "resource_exhausted",
+                "history_unavailable",
+                "worker_unavailable",
+                "decoder_failed",
+                "unsupported_capability",
+                "capture_failed",
+                "initialization_failed"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

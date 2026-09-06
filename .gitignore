@@ -11,3 +11,4 @@ TestResults/
 *.pem
 *.key
 .worktrees/
+artifacts/

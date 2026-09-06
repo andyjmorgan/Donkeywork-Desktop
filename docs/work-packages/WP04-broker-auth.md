@@ -1,4 +1,6 @@
-# WP04 — .NET broker, Keycloak and session grants
+# WP04 — M1b .NET broker, Keycloak and session grants (deferred)
+
+This is M1b work, not an M1a dependency or initial dispatch lane. M1a authenticates its local CLI using verified Unix peer UID, an allowlist and fixed permissions/account profile on a dedicated local API; it requires no Keycloak, broker HTTP API, remote OAuth or browser grants. Do not expose the raw privileged broker socket through the CLI path. Add the reviewed broker trust boundary separately when M1b starts.
 
 ## Outcome and ownership
 
@@ -6,7 +8,7 @@ Implement the co-located single-host control plane in .NET. Own only `broker/`; 
 
 ## Scope
 
-- Propose the browser-facing HTTP/WebSocket API as a contract-only PR, reviewed by WP03/WP05/WP06, before implementing endpoints. The existing `contracts/` v0.1.0 draft defines worker wire messages, not yet an HTTP API. Cover local device, capabilities, session creation/closure and streaming-route coordination.
+- Propose the browser-facing HTTP/WebSocket API as a contract-only PR, reviewed by WP01/WP03/WP05/WP06, before implementing endpoints. The v0.2.0 local CLI contract is not an HTTP API; the earlier v0.1.0 browser messages are design inputs, not proof of a ready API. Cover local device, capabilities, session creation/closure and streaming-route coordination.
 - Integrate Keycloak using the frozen authentication/session model. Validate issuer, audience, signature and expiry; enforce device/operation authorization server-side.
 - Issue short-lived grants bound to user, device, session and permitted operations. Enforce replay/reuse policy and expiry exactly as agreed in contracts.
 - Connect to local worker IPC; keep frame decoding and encoding outside .NET.
@@ -26,7 +28,7 @@ Freeze broker API, Keycloak auth flow, cookie/token handling, opaque grant issua
 - Verify unauthenticated HTTP and streaming upgrade attempts cannot create usable sessions.
 - Verify logs and returned errors do not expose credentials, grants or terminal payloads.
 - Provide an explicit development configuration and validated configuration-failure behaviour.
-- Test unauthorized resize, missing/expired control lease, stale topology input and resize failure; verify the integrated `3840×2160 → 1920×1080 → 3840×2160` sequence needs no desktop reauthorization/reconnect and leaves the terminal running. Unsupported pilot live resize is an M1 blocker.
+- Test unauthorized resize, missing/expired control lease, stale topology input and resize failure; verify the integrated `3840×2160 → 1920×1080 → 3840×2160` sequence needs no desktop reauthorization/reconnect and leaves the terminal running. Unsupported pilot live resize is an M1b blocker. M1a proves the same device operation locally first.
 
 ## Handoff
 

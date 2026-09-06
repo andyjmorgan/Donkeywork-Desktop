@@ -1,49 +1,53 @@
 # Parallel work packages
 
-M1 proves one Linux host providing its console and terminal to an authenticated web browser. The broker and device worker run on that host. Fleet rollout, enrollment, MCP execution and computer-use pods are later milestones.
+M1a proves a local authenticated Rust daemon plus agent CLI on one Linux X11 host: native-4K screenshots, coordinate clicks, keyboard/text input, actual live resolution changes and a real PTY. It requires no .NET broker, Keycloak, browser, remote CLI authentication or video encoding. M1b adds browser video, the .NET broker, Keycloak and original web console around that same capture/input backend. No implementation APIs are claimed to exist yet.
 
-M1 also requires changing the **actual remote desktop resolution** from the web UI during an active session: `3840×2160 → 1920×1080 → 3840×2160`, without reconnecting the desktop session or interrupting its terminal. Browser/video scaling does not satisfy this requirement. The pilot must expose supported modes; lack of live mode-changing capability blocks M1 completion. Contract messages `display.resize` / `display.resize.result`, `availableResolutions`, the `desktop.resize` permission, control lease, topology revisions and decoder `streamGeneration` changes are shared dependencies across WP01–04, WP06 and WP07.
+Both stages require actual display mode changes `3840×2160 → 1920×1080 → 3840×2160` without reopening the desktop session or disrupting its PTY. M1a drives this through the CLI; M1b through the web UI. Scaling a screenshot, video or browser is insufficient. Unsupported pilot mode switching blocks acceptance.
 
-These documents are executable assignment briefs for agents, Fable or human contributors. GitHub issues track assignment and discussion; the versioned documents define the work. An assignment is not permission to install software on lab hosts, change production, publish endpoints or modify Keycloak.
+Read the [architecture review](../reviews/2026-09-06-m1a-architecture-review.md) for findings. The selected response is local-only M1a; the review's remote OAuth/HTTP phase and suggested timing/payload values are proposals, not additional M1a requirements. The integrator's [local CLI contract](../../contracts/local-cli.md), draft v0.2.0, defines the selected profile and limits.
 
 ## Start gate and coordination
 
-The protocol in `contracts/` is **v0.1.0 draft**. Fixture-driven prototypes can begin against an identified commit. Before implementations merge, the integration owner must approve and freeze a consistent baseline, including capture/encoder interfaces, session lifecycle, grants, media framing, input and terminal messages. Missing decisions block the affected implementation; record the exact missing decision rather than silently inventing another protocol.
+Freeze a reviewed v0.2.0 baseline, schemas, fixtures and the WP01/WP02 capture interface before implementation merges. Wire schemas do not themselves define Rust traits, browser package APIs or HTTP endpoints. Missing interfaces block their dependent integration and require a contract PR before implementation assumes them. The integrator owns `contracts/`, shared root manifests and build wiring.
 
-Any shared-interface change requires a contract PR first, with affected owners reviewing compatibility and fixtures. Work package authors own no files in `contracts/`. Until a baseline is frozen, no package may claim interoperability or production readiness.
+Use separate worktrees and `work/wpXX-name` branches. One owner writes each path; no private protocol forks or edits to another owner's directory. Assign against a recorded baseline SHA. These briefs are planning/implementation assignments, not permission to install on hosts, change displays, retrieve credentials, change Keycloak or deploy.
 
-Use a separate Git worktree and branch per assignment (`work/wpXX-name`). One owner writes each path at a time. The integration owner owns root manifests, shared build configuration, contract fixtures and release decisions; request changes there through a separate PR. No agent changes another package's directory to make its own work pass.
+## Dependency and ownership graph
 
-| Package | Owned implementation paths | Dependencies |
-| --- | --- | --- |
-| [WP01](WP01-device-core.md) | `device/core/` | Contract lifecycle, local IPC and capture/terminal interfaces |
-| [WP02](WP02-capture-encode.md) | `device/capture/` | Capture/encoder contract; WP01 for live integration |
-| [WP03](WP03-browser-session.md) | `browser-session/` | Media/input contract; WP02 for live video, WP04 for grants |
-| [WP04](WP04-broker-auth.md) | `broker/` | Auth/IPC contract; WP01 for live sessions |
-| [WP05](WP05-terminal.md) | `device/terminal/`, `browser-terminal/` | Terminal contract; WP01 and WP04 for live authorization |
-| [WP06](WP06-web-console.md) | `web/` | Public APIs from WP03–05; fixtures permit earlier UI work |
-| [WP07](WP07-integration-acceptance.md) | `tests/integration/`, `tests/performance/`, `tests/security/`, `docs/validation/` | Frozen contracts and WP01–06 for full acceptance |
-| [WP08](WP08-future-design.md) | `docs/future/` | M1 contracts and emerging limitations; design only |
+| Package | Stage | Owned paths | Dependencies |
+| --- | --- | --- | --- |
+| [WP01](WP01-device-core.md) | M1a | `device/core/` | Frozen local CLI/session/auth and capture/PTY interfaces |
+| [WP02](WP02-capture-encode.md) | M1a capture/stills/input; M1b video | `device/capture/` | Capture interface; WP01/WP09 for live proof |
+| [WP09](WP09-agent-cli.md) | M1a | `cli/` | Local CLI contract; WP01/WP02/WP05 for live proof |
+| [WP05](WP05-terminal.md) | M1a daemon PTY; M1b browser | `device/terminal/`, `browser-terminal/` | Local terminal auth/profile contract; WP01/WP09 first |
+| [WP07](WP07-integration-acceptance.md) | M1a gate, then M1b gate | `tests/integration/`, `tests/performance/`, `tests/security/`, `docs/validation/` | WP01/WP02/WP05/WP09 for M1a; WP03/WP04/WP06 additionally for M1b |
+| [WP03](WP03-browser-session.md) | M1b deferred | `browser-session/` | Proven capture source, media transport/API amendments and WP04 |
+| [WP04](WP04-broker-auth.md) | M1b deferred | `broker/` | Explicit broker HTTP/auth/IPC boundary contracts |
+| [WP06](WP06-web-console.md) | M1b deferred | `web/` | Approved browser-session/terminal package APIs and broker HTTP API |
+| [WP08](WP08-future-design.md) | Future design only | `docs/future/` | Proven M1a/M1b boundaries; no implementation |
 
-Suggested initial lanes are WP01, WP02, WP03 and WP04, subject to available owners. WP05 and WP06 can develop against approved fixtures. WP07 defines measurements early and performs system validation once components exist. WP08 does not block M1. This is a dependency graph, not a schedule or provider allocation.
+Three initial lanes: **WP01 daemon core**, **WP02 capture/still/input**, **WP09 CLI**. They can use approved fixtures until the interfaces connect. WP05 PTY comes next, while WP07 prepares independent acceptance. WP03/WP04/WP06 and the video/browser halves of WP02/WP05 are deferred to M1b. WP08 does not block either gate.
+
+M1a authentication uses verified Unix peer UID, an explicit allowlist, service-owned socket permissions and a fixed permission/account profile. The CLI cannot submit a principal or access raw broker-only IPC. Topology/screenshot reads require `desktop.view` but no control lease; input and actual resize require permission plus the current lease and topology validation. Browser grants and stream generations do not belong to M1a.
 
 ## GitHub ledger
 
-[M1 milestone](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/1) tracks WP01–07; WP08 is future design only. No implementation owners have been assigned automatically.
+[M1a — Agent CLI and Linux daemon](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/1) and [M1b — Live browser desktop](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/2) track the split. No implementation owners are assigned automatically.
 
 | Work package | Issue |
 | --- | --- |
-| WP01 — Device core | [#1](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/1) |
-| WP02 — Capture/encode | [#2](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/2) |
-| WP03 — Browser session | [#3](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/3) |
-| WP04 — Broker/auth | [#4](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/4) |
-| WP05 — Terminal | [#5](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/5) |
-| WP06 — Web console | [#6](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/6) |
-| WP07 — Acceptance | [#7](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/7) |
+| WP01 — M1a device core | [#1](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/1) |
+| WP02 — M1a capture/still/input; M1b video | [#2](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/2) |
+| WP03 — M1b browser session | [#3](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/3) |
+| WP04 — M1b broker/auth | [#4](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/4) |
+| WP05 — M1a PTY; M1b browser terminal | [#5](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/5) |
+| WP06 — M1b web console | [#6](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/6) |
+| WP07 — M1a/M1b acceptance | [#7](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/7) |
 | WP08 — Future design | [#8](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/8) |
+| WP09 — M1a agent CLI | [#9](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/9) |
 
 ## Shared acceptance and handoff
 
-All implementation must be original: no copying or translating RustDesk source, UI, assets or wording. Document independent dependencies and their licenses. RustDesk is background inspiration only.
+Write original code; do not copy/adapt/translate RustDesk source, assets or wording. Document inspiration and dependency licenses. This is not clean-room development, and the outbound project license remains undecided.
 
-Every handoff includes branch and commit SHA, owned paths changed, contract-baseline SHA, commands run with results, recorded environment, limitations, blocked prerequisites and the next integration step. Distinguish fixture/mock tests from real hardware results. Never report 4K, hardware acceleration, security or end-to-end compatibility based on stubs. Include provenance and dependency-license notes. Open a draft PR when useful; do not merge across ownership boundaries without review.
+Every handoff records branch, base/commit SHA, contract-baseline SHA/version, owned paths, commands/results, environment, provenance, limitations, blocked prerequisites and next integration step. Distinguish fixture tests from physical-host evidence. Never claim 4K capture, hardware acceleration, auth or interoperability from stubs. No payloads, keystrokes, grants, credentials or PTY content in logs. Submit reviewable branches; no merges/pushes to main from a work package.

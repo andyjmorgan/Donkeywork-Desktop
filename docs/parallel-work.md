@@ -4,7 +4,7 @@
 
 Use GitHub issues and docs/work-packages as the common task ledger. Each issue body is a self-contained handoff. Fable is another developer consuming the same repo/contracts; no special integration is assumed or configured.
 
-The [issue ledger](work-packages/README.md#github-ledger) maps all eight packages. Suggested split: device core and capture/encode as one coordinated engineering lane; browser session and its 4K fixture tests as a second; broker/auth as a third. Fable can take WP06's original UI shell against labelled mocks while those contracts settle, or WP07's independent test harness. These are suggested assignments, not dispatched jobs. WP05 is independent PTY work once its worker/package interfaces are agreed.
+The [issue ledger](work-packages/README.md#github-ledger) maps the packages. M1a initial lanes are WP01 daemon/session core, WP02 capture/still/input backend, and WP09 agent CLI. WP05 PTY follows in the next available slot; WP07 defines acceptance early. WP03 browser, WP04 broker/auth and WP06 web UI are M1b, not initial implementation lanes. Fable can independently review the amended contracts or develop WP07 acceptance tooling in its own worktree; no external Fable execution is configured here.
 
 Record the exact `git rev-parse HEAD` at handoff; never hand an agent a moving branch name as its only baseline reference.
 
@@ -46,6 +46,6 @@ Do not mistake JSON validation for session safety. [The contract reference](../c
 
 ## Integration order
 
-Contract baseline -> parallel component shells/fixtures and codec spike -> real capture/browser pairing -> real worker/broker auth and PTY -> UI wiring -> 4K/security/recovery validation.
+Local CLI contract baseline -> parallel daemon, capture/input and CLI components -> PTY integration -> real screenshot/click/resize/security evidence (M1a) -> video/browser/broker integration and 4K streaming evidence (M1b).
 
 WP08 is design/backlog only. Fleet rollout, MCP desktop tools and computer-use pods do not become authorized implementation just because they are documented.
