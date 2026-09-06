@@ -149,6 +149,22 @@ fn canonical_examples_conform_and_spoofed_identity_does_not() {
 }
 
 #[test]
+fn strict_json_rejects_nested_and_escaped_duplicate_keys() {
+    for bytes in [
+        br#"{"a":1,"a":2}"#.as_slice(),
+        br#"[{"a":1,"\u0061":2}]"#.as_slice(),
+        br#"{"outer":{"x":null,"x":false}}"#.as_slice(),
+    ] {
+        assert!(wire::parse_json(bytes).is_err());
+    }
+    let valid = br#"{"array":[null,true,false,1,-2,1.25,"text",{"nested":0}]}"#;
+    assert_eq!(
+        wire::parse_json(valid).unwrap(),
+        serde_json::from_slice::<Value>(valid).unwrap()
+    );
+}
+
+#[test]
 fn unavailable_backend_never_claims_a_session_or_desktop() {
     let connection = Connection::new(1234);
     let mut core = Core::new(

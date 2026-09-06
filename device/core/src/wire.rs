@@ -1,3 +1,7 @@
+use serde::{
+    Deserialize, Deserializer,
+    de::{self, MapAccess, SeqAccess, Visitor},
+};
 use serde_json::{Value, json};
 use std::{io, sync::OnceLock};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
@@ -86,6 +90,69 @@ fn invalid() -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, "invalid protocol record")
 }
 
+struct UniqueValue(Value);
+impl<'de> Deserialize<'de> for UniqueValue {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct UniqueVisitor;
+        impl<'de> Visitor<'de> for UniqueVisitor {
+            type Value = UniqueValue;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("JSON without duplicate object keys")
+            }
+            fn visit_bool<E: de::Error>(self, value: bool) -> Result<Self::Value, E> {
+                Ok(UniqueValue(Value::Bool(value)))
+            }
+            fn visit_i64<E: de::Error>(self, value: i64) -> Result<Self::Value, E> {
+                Ok(UniqueValue(value.into()))
+            }
+            fn visit_u64<E: de::Error>(self, value: u64) -> Result<Self::Value, E> {
+                Ok(UniqueValue(value.into()))
+            }
+            fn visit_f64<E: de::Error>(self, value: f64) -> Result<Self::Value, E> {
+                serde_json::Number::from_f64(value)
+                    .map(|n| UniqueValue(Value::Number(n)))
+                    .ok_or_else(|| E::custom("invalid JSON number"))
+            }
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                Ok(UniqueValue(value.into()))
+            }
+            fn visit_string<E: de::Error>(self, value: String) -> Result<Self::Value, E> {
+                Ok(UniqueValue(value.into()))
+            }
+            fn visit_unit<E: de::Error>(self) -> Result<Self::Value, E> {
+                Ok(UniqueValue(Value::Null))
+            }
+            fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+                let mut values = Vec::new();
+                while let Some(UniqueValue(value)) = seq.next_element()? {
+                    values.push(value);
+                }
+                Ok(UniqueValue(Value::Array(values)))
+            }
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+                let mut values = serde_json::Map::new();
+                while let Some(key) = map.next_key::<String>()? {
+                    if values.contains_key(&key) {
+                        return Err(de::Error::custom("duplicate JSON key"));
+                    }
+                    let UniqueValue(value) = map.next_value()?;
+                    values.insert(key, value);
+                }
+                Ok(UniqueValue(Value::Object(values)))
+            }
+        }
+        deserializer.deserialize_any(UniqueVisitor)
+    }
+}
+
+/// Recursively rejects duplicate keys, including equivalent escaped names. Error text
+/// never includes the key or value. The caller must bound bytes before invoking this.
+pub fn parse_json(bytes: &[u8]) -> io::Result<Value> {
+    serde_json::from_slice::<UniqueValue>(bytes)
+        .map(|value| value.0)
+        .map_err(|_| invalid())
+}
+
 pub async fn read_request<R: AsyncRead + Unpin>(reader: &mut R) -> io::Result<Value> {
     let length = reader.read_u32().await? as usize;
     if length == 0 || length > MAX_HEADER {
@@ -93,7 +160,7 @@ pub async fn read_request<R: AsyncRead + Unpin>(reader: &mut R) -> io::Result<Va
     }
     let mut bytes = vec![0; length];
     reader.read_exact(&mut bytes).await?;
-    let message: Value = serde_json::from_slice(&bytes).map_err(|_| invalid())?;
+    let message = parse_json(&bytes)?;
     if !valid_request(&message) {
         return Err(invalid());
     }

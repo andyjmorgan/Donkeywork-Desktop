@@ -94,6 +94,32 @@ async fn malformed_and_oversized_frames_close_without_large_allocation() {
     stop.send(true).unwrap();
     task.await.unwrap().unwrap();
 }
+
+#[tokio::test]
+async fn duplicate_keys_close_real_socket_before_dispatch() {
+    let (_dir, path, stop, task) = start(effective_uid()).await;
+    let id = "11111111-1111-4111-8111-111111111111";
+    let messages = [
+        format!(
+            r#"{{"protocol":"dwdesktop.local","version":"0.2.0","type":"describe","type":"describe","messageId":"{id}","payload":{{}}}}"#
+        ),
+        format!(
+            r#"{{"protocol":"dwdesktop.local","version":"0.2.0","type":"screenshot.request","messageId":"{id}","sessionId":"{id}","sessionEpoch":"{id}","payload":{{"displayId":"d","includeCursor":false,"includeCursor":false}}}}"#
+        ),
+    ];
+    for message in messages {
+        let mut stream = UnixStream::connect(&path).await.unwrap();
+        stream.write_u32(message.len() as u32).await.unwrap();
+        stream.write_all(message.as_bytes()).await.unwrap();
+        let mut byte = [0];
+        let outcome = tokio::time::timeout(Duration::from_secs(2), stream.read(&mut byte))
+            .await
+            .unwrap();
+        assert!(matches!(outcome, Ok(0)) || outcome.is_err());
+    }
+    stop.send(true).unwrap();
+    task.await.unwrap().unwrap();
+}
 #[tokio::test]
 async fn rejects_writable_socket_directory_and_preserves_existing_target() {
     let dir = tempfile::tempdir().unwrap();
