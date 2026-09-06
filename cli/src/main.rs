@@ -287,11 +287,15 @@ fn run(args: &Args) -> Result<()> {
                     "Resize response names a different display.",
                 ));
             }
+            let previous_revision = s["topologyRevision"].as_u64().unwrap();
+            let actual_revision = p["topologyRevision"].as_u64().unwrap();
+            let size_changed = s["width"] != *width || s["height"] != *height;
             if p["status"] == "applied"
                 && (p["width"] != *width
                     || p["height"] != *height
                     || p["reason"] != "none"
-                    || p["topologyRevision"].as_u64() <= s["topologyRevision"].as_u64())
+                    || actual_revision < previous_revision
+                    || (size_changed && actual_revision == previous_revision))
             {
                 return Err(Failure::new(
                     "invalid_record",

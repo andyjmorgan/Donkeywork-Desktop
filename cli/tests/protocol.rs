@@ -482,3 +482,132 @@ fn resize_rejection_reports_actual_mode_and_releases_control() {
         "resize_rejected"
     );
 }
+
+#[test]
+fn applied_resize_accepts_unchanged_revision_only_for_a_genuine_noop() {
+    for (name, requested, actual, previous_revision, actual_revision, succeeds) in [
+        (
+            "same size and revision",
+            (3840, 2160),
+            (3840, 2160),
+            1,
+            1,
+            true,
+        ),
+        (
+            "same size newer revision",
+            (3840, 2160),
+            (3840, 2160),
+            1,
+            2,
+            true,
+        ),
+        (
+            "changed size requires revision",
+            (1920, 1080),
+            (1920, 1080),
+            1,
+            1,
+            false,
+        ),
+        (
+            "height-only change requires revision",
+            (3840, 1080),
+            (3840, 1080),
+            1,
+            1,
+            false,
+        ),
+        (
+            "changed size newer revision",
+            (1920, 1080),
+            (1920, 1080),
+            1,
+            2,
+            true,
+        ),
+        (
+            "same size older revision",
+            (3840, 2160),
+            (3840, 2160),
+            2,
+            1,
+            false,
+        ),
+        (
+            "actual size differs from request",
+            (3840, 2160),
+            (1920, 1080),
+            1,
+            1,
+            false,
+        ),
+    ] {
+        let f = Fixture::new();
+        let (context, snapshot) = fixture_context(&f);
+        let mut metadata: Value = serde_json::from_slice(&fs::read(&snapshot).unwrap()).unwrap();
+        metadata["payload"]["topologyRevision"] = json!(previous_revision);
+        fs::write(&snapshot, serde_json::to_vec(&metadata).unwrap()).unwrap();
+        let listener = f.listener.try_clone().unwrap();
+        let server = thread::spawn(move || {
+            let (mut s, _) = listener.accept().unwrap();
+            s.set_read_timeout(Some(std::time::Duration::from_secs(5)))
+                .unwrap();
+            let acquire = read_record(&mut s).unwrap().header;
+            assert_eq!(acquire["type"], "control.acquire");
+            write_record(
+                &mut s,
+                &reply(
+                    &acquire,
+                    "control.granted",
+                    json!({"leaseId":LEASE,"validForMs":45000}),
+                ),
+            )
+            .unwrap();
+            let resize = read_record(&mut s).unwrap().header;
+            assert_eq!(resize["type"], "display.resize");
+            assert_eq!(resize["payload"]["width"], requested.0);
+            assert_eq!(resize["payload"]["height"], requested.1);
+            write_record(&mut s, &reply(&resize, "display.resize.result", json!({
+                "displayId":"display-0","status":"applied","width":actual.0,"height":actual.1,
+                "topologyRevision":actual_revision,"reason":"none"
+            }))).unwrap();
+            let release = read_record(&mut s).unwrap().header;
+            assert_eq!(release["type"], "control.release");
+            write_record(&mut s, &reply(&release, "ack", json!({}))).unwrap();
+        });
+        let out = f
+            .command()
+            .arg("resize")
+            .arg("--context")
+            .arg(context)
+            .arg("--snapshot")
+            .arg(snapshot)
+            .arg("--width")
+            .arg(requested.0.to_string())
+            .arg("--height")
+            .arg(requested.1.to_string())
+            .output()
+            .unwrap();
+        server.join().unwrap();
+        assert_eq!(
+            out.status.success(),
+            succeeds,
+            "{name}: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        if succeeds {
+            let response: Value = serde_json::from_slice(&out.stdout).unwrap();
+            assert_eq!(
+                response["payload"]["topologyRevision"], actual_revision,
+                "{name}"
+            );
+        } else {
+            assert_eq!(
+                serde_json::from_slice::<Value>(&out.stderr).unwrap()["code"],
+                "invalid_record",
+                "{name}"
+            );
+        }
+    }
+}
