@@ -2,6 +2,18 @@
 
 ## Boundaries
 
+### M1a decision — supersedes browser-first sequencing
+
+Agent CLI -> dedicated Unix socket -> Rust daemon -> shared X11 capture/input backend and PTY. The CLI socket is NOT the trusted broker IPC socket described below. Kernel peer UID plus an explicit administrator-owned allowlist maps callers to capabilities and fixed OS profiles. Deny unmapped UIDs, check socket ownership/permissions, and never trust a caller-supplied UID/account. Run with the minimum required graphical-session privileges; do not give shell users the supervisor's root identity.
+
+The local CLI contract is separately versioned in contracts/local-cli.md. Existing 0.1.0 broker/media contracts below remain M1b drafts, not the local CLI authentication protocol. Snapshot observation requires desktop.view, not a control lease; input and mode changes require explicit control. Do not lengthen fail-closed deadlines for CLI convenience.
+
+Capture supplies one canonical native framebuffer source for still PNGs now and video later. Screenshot binary payloads have their own bounded size; the 16 MiB video limit is not a PNG guarantee. Screenshot identity/time/topology describe the observation; stale topology is rejected before input, but unchanged topology does not guarantee an application target has not moved. No automatic replay of uncertain clicks/text.
+
+M1a targets X11 with RandR mode support, not generic Wayland. Spark is only a proposed pilot. Read-only mode inventory and mutating mode-switch tests are distinct tasks; neither lab access nor display changes are authorized by delegation. M1a completion requires real hardware evidence, not fixtures.
+
+### M1b broker/browser route
+
 Browser UI -> browser-session/browser-terminal packages -> authenticated broker attachment -> device worker. The local worker connection is a Unix-domain socket; a future remote adapter must preserve the same authorization semantics.
 
 The broker owns Keycloak identity and policy. The worker enforces permitted operations and owns OS resources. Watching a session, attaching to a session and controlling input are separate capabilities.
@@ -14,7 +26,7 @@ M1's reference security route redeems a one-use attachment grant through the aut
 - IPC control: length-prefixed UTF-8 JSON.
 - Exact draft contract: 0.1.0. An implementation cannot silently accept a different version.
 - Capture/encode library and media transport are not selected by schema presence.
-- M1 full-display video; no hybrid PNG/video rectangle compositor.
+- M1b full-display video; no hybrid PNG/video rectangle compositor. M1a PNG stills are not a video codec.
 - Lossless convergence remains a quality option if baseline video fails; 4:4:4 is not lossless.
 - No B-frame/reordered-frame support in v0: decode and presentation order must match.
 - Local physical input is outside the broker lease. Remote takeover does not prevent a person using the device keyboard.

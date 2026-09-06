@@ -1,5 +1,7 @@
 # Contracts — draft 0.1.0
 
+M1a's separate local UID-authenticated agent CLI protocol is specified in [local-cli.md](local-cli.md) at version 0.2.0. The remainder of this document remains the M1b broker/browser draft; its trusted broker socket and attachment grants are not exposed to the local CLI.
+
 Reviewable baseline, not proven interoperability. contracts/ is integrator-owned. Changes need schemas, fixtures, tests and affected component review. Run npm test.
 
 ## Rules

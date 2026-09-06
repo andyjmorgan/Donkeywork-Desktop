@@ -1,33 +1,30 @@
-# WP07 — Integration, performance and security acceptance
+# WP07 — M1a acceptance, then M1b streaming acceptance
 
 ## Outcome and ownership
 
-Produce reproducible evidence that the single-host MVP works. Own only `tests/integration/`, `tests/performance/`, `tests/security/` and `docs/validation/`; branch `work/wp07-integration-acceptance`, separate worktree. Component owners fix their paths; request root CI and contract-fixture changes separately.
+Own `tests/integration/`, `tests/performance/`, `tests/security/` and `docs/validation/`; branch `work/wp07-integration-acceptance`, separate worktree. Component owners fix their paths; contracts/root CI belong to the integrator. Prepare independent evidence for distinct M1a and M1b gates.
 
-## Scope
+## M1a scope and hard acceptance
 
-- Define the test matrix and evidence format early, then integrate WP01–06 against the frozen `contracts/` v0.1.0 baseline.
-- Exercise login, authorized console and PTY, logout/expiry, disconnect/reconnect, display changes and process cleanup.
-- Measure 3840×2160 motion, small coloured text and terminal scrolling. Record delivered frame rate, input-to-display methodology, bandwidth, CPU/GPU load, codec/chroma and dropped/stale frames.
-- Compare native-scale fidelity with scaled browser viewing; distinguish 4:4:4, lossless pixels and subjective readability.
-- Test bounded queues and recovery under controlled latency, bandwidth limits and packet loss in an isolated environment. Include LAN and agreed WAN scenarios.
-- Test authorization, grant scope/expiry/replay, origin boundaries, malformed messages, limits, input after logout and log redaction.
-- Verify actual remote desktop mode changes from the web UI `3840×2160 → 1920×1080 → 3840×2160` without reconnecting the desktop session or interrupting a running terminal. Independently inspect OS/display mode, not just video dimensions. Check `availableResolutions`, `desktop.resize` permission, active control lease, `display.resize` / `display.resize.result`, topology revisions and decoder `streamGeneration` changes. Exercise stale-input rejection during transitions and visible failure with the previous mode preserved/restored.
+Use the frozen `contracts/local-cli.md` v0.2.0 profile with WP01/WP02/WP05/WP09. No broker, Keycloak, browser, remote OAuth or video prerequisite.
 
-No deployment, port forwarding, real credential capture or changes to lab hosts/Keycloak. Hardware/privileged tests require separately established scope. Write original tests and tooling; no copied RustDesk code/assets. Document dependencies and licenses.
+- Verify OS peer UID allowlist, socket ownership/permissions, fixed permissions/account profile and rejection of client identity spoofing/raw broker commands. Check denial before backend side effects.
+- A `desktop.view` principal can inspect topology/take screenshots without a control lease, but cannot acquire unauthorized control. Input/resize require current lease and correct topology; expiry/revoke releases held input and interrupts further actions.
+- Decode a real `3840×2160` PNG and verify exact native dimensions, capture metadata, topology, cursor policy and bounded binary framing. Test oversize/undeclared bytes and malformed payloads; never accept truncation or downsampling as success.
+- Perform screenshot → click/type known target → screenshot confirming action. Validate extreme corner coordinates at 4K and 1080p, stale pre-resize topology, out-of-bounds coordinates and no automatic replay of ambiguous actions.
+- Independently verify actual X11/RandR modes `3840×2160 → 1920×1080 → 3840×2160` from CLI while desktop session/epoch and a running PTY survive. Record actual modes, terminal process continuity and failure/rollback reporting. Unsupported pilot resize blocks M1a.
+- Exercise PTY bytes, resize, cleanup, slow-consumer limits and logs without screenshot/input/PTY/credential bodies.
 
-## Prerequisites and blockers
+The pilot requires X11/RandR and advertised 4K/1080p modes; Spark remains unverified until evidence exists. This assignment authorizes no live display changes or installation. Missing approved host access means blocked physical acceptance, not a passed fixture substitute.
 
-The contract baseline and component builds must be frozen before claiming interoperability. Physical display, approved test-host access, browser versions and measurement equipment/method are explicit prerequisites for real performance claims. If missing, prepare runnable harnesses and mark those checks unverified. Acceptance thresholds proposed in the brief remain proposed until recorded as agreed; never manufacture measurements to meet them.
+## M1b deferred scope
 
-## Acceptance
+Add WP03/WP04/WP06 and video/browser halves of WP02/WP05. Verify Keycloak, broker grants, origin/CSRF/upgrade boundaries, browser input, live resolution selector, decoder generation reconfiguration and terminal continuity.
 
-- A reproducible procedure and machine-readable results identify source SHAs, environment, command, workload and outcome.
-- Functional/security failures have actionable reproductions assigned to the owning package.
-- Performance report explicitly states whether 4K60 was achieved, for which path, with latency/fidelity limitations. Mocks and sample playback cannot pass physical end-to-end acceptance.
-- Results distinguish pass, fail, blocked and not run; secrets and private screen content are excluded from artifacts.
-- Actual active-session resolution changes are a hard M1 acceptance gate. Unsupported pilot capability is blocked/failed acceptance, never an optional skip or a passed scaling test. Evidence records session identity continuity, terminal continuity, actual modes, decoder reconfiguration and failure recovery.
+Measure 4K motion/text, codec/chroma, frame rate, bounded queue behavior, bandwidth, input latency methodology and CPU/GPU load on LAN and isolated impaired-network scenarios. Compare screenshot versus decoded video from the same capture source/frame within codec tolerance. 4K60 is a measured target on a declared capable baseline, not an M1a still-image gate or universal hardware claim.
 
-## Handoff
+## Prerequisites, evidence and handoff
 
-Provide branch, commit SHA, all component/contract SHAs, commands/results, evidence locations, dependency/provenance notes and residual risks. Recommend accept or hold with concrete evidence; the integration owner decides M1 completion. No production changes are authorized.
+Freeze exact contract/component SHAs per run. Missing API/interface decisions need contract amendments; no invented endpoints. Results identify command, workload, OS/display/browser as relevant, artifact and pass/fail/blocked/not-run status. Synthetic fixtures cannot establish physical capture, security or end-to-end performance.
+
+Original tests only; no RustDesk code/assets/adaptations. No deployment, port forwards, credential capture, production/Keycloak changes or host modifications without separately scoped authorization. Provide branch, base/commit/component/contract SHAs, commands/results, safe artifacts, dependency provenance, limitations and accept/hold recommendation per milestone. The integrator decides completion.

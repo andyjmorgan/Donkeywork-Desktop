@@ -1,31 +1,27 @@
-# WP05 — Rust PTY and browser terminal package
+# WP05 — M1a daemon PTY; M1b browser terminal
 
 ## Outcome and ownership
 
-Deliver terminal access under the same session authorization as desktop access. Own only `device/terminal/` and `browser-terminal/`; branch `work/wp05-terminal`, separate worktree. WP01 owns lifecycle integration and WP06 owns React page composition. Export an integration API; do not edit their paths.
+Own `device/terminal/` and `browser-terminal/` on `work/wp05-terminal` in a separate worktree. M1a delivers daemon PTYs consumed by WP09's CLI through WP01. M1b adds xterm.js. Do not edit CLI, core, broker, web, contracts or root manifests.
 
-## Scope
+## M1a scope
 
-- Implement local Linux PTY creation, byte streaming, resize, exit and cleanup using `contracts/` v0.1.0 draft terminal semantics.
-- Run as the explicitly configured local identity. Do not implement arbitrary user switching, root escalation or accept an uncontrolled shell/environment from the browser.
-- Build an importable xterm.js adapter with bounded buffers, resize handling, connection state and the approved reconnect behaviour.
-- Respect byte-stream encoding and terminal control sequences; terminal output is data, not HTML.
-- Require authorized terminal capability. Keep grant validation and worker ownership aligned with WP01/WP04.
-- Define process-group cleanup and distinguish reconnect to an existing authorized PTY from creation of a new process according to the contract.
+- Implement genuine Linux PTY creation, bytes, resize, exit, retention/resume and process-group cleanup according to the terminal contract and `contracts/local-cli.md` draft v0.2.0.
+- Use the fixed server-configured account/profile selected by verified UID policy. No arbitrary root shell, client-selected identity or unrestricted profile/environment.
+- Enforce terminal permissions and session/epoch binding at the worker boundary; no browser grants or .NET dependency.
+- Preserve the running PTY across actual display resolution changes. Terminal size and desktop mode are independent.
+- Implement ordered byte delivery, bounded output/history, explicit gaps and the approved disconnect/revoke policy. Never auto-replay ambiguous terminal input or log PTY content.
 
-No SSH fleet discovery, MCP shell tools, secret delivery or production changes. Write original code; no RustDesk source or translations. Record xterm.js and other dependency licenses.
+## M1b deferred scope
 
-## Prerequisites and blockers
+Build an importable xterm.js component for the same terminal semantics, then integrate broker authorization and React composition through their owners. Browser disposal and safe rendering are M1b acceptance. No browser work is required to complete the M1a daemon portion.
 
-Freeze terminal framing, maximum sizes, flow control, identity, resize, reconnect and disconnect lifetime before merge. Missing semantics need a contract PR. Local PTY and fixture browser tests can proceed before WP01/WP04; end-to-end authorization cannot.
+## Prerequisites and acceptance
 
-## Acceptance
+Freeze local terminal authorization, framing, account profile, limits and retention semantics before merge. Request contract amendments for missing interfaces; do not claim an existing Rust API. WP01 and WP09 supply live transport/client integration; fixtures permit independent work first.
 
-- Tests cover UTF-8 split across chunks, binary/control bytes, resize, process exit, disconnect, repeated close and process-group cleanup.
-- Bound memory under high output and slow consumers; expose defined errors rather than silently truncating unless contract permits it.
-- Verify denied/expired/wrong-session access cannot attach to or write a PTY through integrated authorization tests.
-- Test browser disposal, safe rendering and resize without injecting production commands or secrets.
+Test split UTF-8 and binary/control bytes, ordering, resize, high output/slow consumer limits, disconnect/resume gaps, repeated close and process-group cleanup. Denied UID/permissions and wrong session cannot access a PTY. Prove a PTY started before `3840×2160 → 1920×1080 → 3840×2160` remains the same running process and accepts input afterward.
 
-## Handoff
+## Boundaries and handoff
 
-Provide branch, commit SHA, contract-baseline SHA, commands/results, environment, dependency/provenance notes, known shell/platform limitations and package APIs for WP01/WP06. Separate local PTY tests from broker-authorized end-to-end results. No physical-host installation or production changes are authorized.
+Original code only; no RustDesk copying/adaptation. No host installation, credential retrieval, production changes or MCP implementation. Provide branch, base/commit SHA, contract SHA/version, commands/results, environment, dependency provenance, limitations and APIs proposed/implemented for WP01/WP09. Mark local/fake versus integrated real PTY results. Record deferred browser work explicitly; do not mark it implemented.

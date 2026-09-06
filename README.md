@@ -1,10 +1,10 @@
 # DonkeyWork Desktop
 
-Linux console and terminal access from an original, Keycloak-authenticated web console, followed by agent/MCP access to the same sessions.
+Linux console and terminal access, starting with an authenticated agent CLI and followed by an original Keycloak-authenticated web console.
 
 **Status: contract and work-package bootstrap. No runnable desktop implementation yet.**
 
-M1 co-locates the .NET broker/web server and Rust device worker on one pilot host. A browser on a different machine must demonstrate high-quality 4K desktop interaction and a real PTY. Split the broker onto attic and enroll the fleet only after this session engine is proven.
+M1a proves a Rust daemon and local Unix-socket CLI on one X11 pilot: native-4K PNG screenshots, clicks/keyboard input, actual live resolution changes and a real PTY. Explicit peer-UID policy authorizes access; no broker, browser or public endpoint is needed for that first slice. M1b adds the .NET broker, Keycloak and browser streaming, including mandatory live resolution changes from the UI. Move the broker to attic and enroll the fleet only after this engine is proven.
 
 ## Start here
 
@@ -37,6 +37,7 @@ Tests check strict JSON schemas, examples, negative cases and an executable sema
 | broker/ | WP04: .NET broker and auth |
 | device/terminal/, browser-terminal/ | WP05: PTY transport and terminal component |
 | web/ | WP06: React console |
+| cli/ | WP09: authenticated agent CLI (M1a) |
 | tests/integration/, tests/performance/, tests/security/, docs/validation/ | WP07: integration and acceptance |
 | contracts/ | Contract integrator; changes require cross-component review |
 

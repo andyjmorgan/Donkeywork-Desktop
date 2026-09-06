@@ -1,5 +1,19 @@
 # M1 acceptance
 
+## M1a required acceptance — CLI and daemon
+
+- On an explicitly authorized X11 pilot, run describe -> screenshot -> click a known test target -> screenshot verifying the effect. Test keyboard input without replaying uncertain actions.
+- Native 3840×2160 PNG decodes to reported dimensions; metadata identifies session/epoch/display/topology/snapshot and capture time. Capture is fresh, cursor policy explicit, binary bytes bounded separately from JSON. Test incompressible images and decoded allocation bounds.
+- CLI changes actual mode 3840×2160 -> 1920×1080 -> 3840×2160 with independently verified OS modes, same desktop session and uninterrupted PTY. Corner-pixel accuracy, stale topology, out-of-range coordinates, unsupported mode and failed rollback are tested.
+- Explicit UID allowlist rejects unmapped callers; view-only cannot inject input or resize. Check forged identity, socket permissions, lease expiry/revoke, process cleanup and no sensitive content in logs.
+- PTY supports resize, Ctrl-C, job control, correct exit and bounded reconnect policy under a fixed authorized OS profile.
+- CLI emits structured results, nonzero failures and private screenshot files. Tests use synthetic non-sensitive desktop content; screenshots are sensitive artifacts, not audit logs.
+- No loopback mock can satisfy actual desktop acceptance. No 4K streaming/browser-performance claim follows from PNG capture. Lab display changes need separately scoped approval.
+
+## M1b required acceptance — browser and remote authentication
+
+The following browser/streaming criteria apply to M1b, not to the local-only M1a slice.
+
 No measurements exist yet. 3840×2160 native viewing and usable text are required; 60 fps is a target on a declared capable baseline. A proposed p95 input-to-photon LAN target is <100 ms, subject to Andrew's review and a measurement method that includes capture/encode/network/decode/render. Do not report software timestamp deltas as complete input-to-photon measurements.
 
 ## Required evidence

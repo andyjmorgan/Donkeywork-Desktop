@@ -2,9 +2,13 @@
 
 Andrew Morgan wants a Linux-first console-sharing and terminal system with an original web UI, Keycloak login and eventual daemon enrollment across attic, office, minigpu and Spark. Existing console sharing is sufficient; visible local output/input is acceptable. M1 does not implement Microsoft's RDP protocol or RDS multi-user sessions.
 
-## M1
+## M1a — agentic engine first
 
-One installation on one pilot host: Rust worker plus .NET 10 broker serving a React UI and a reusable browser session package. The controlling browser runs on a different machine. Prove 4K quality, input, PTY and auth before separating deployment.
+One X11 pilot, Rust daemon and agent-facing CLI over a dedicated Unix socket. Required: display enumeration, fresh native-4K PNG screenshots with machine-readable metadata, coordinate clicks, keyboard input, actual 4K -> 1080p -> 4K mode changes preserving session and PTY, and real terminal access. Explicit allowed peer UIDs map to permissions and fixed OS profiles; no implicit root or any-local-user access. The CLI can be invoked through an existing separately authorized shell connection, but M1a adds no remote listener. This intentionally scopes M1a to local authentication; remote OAuth is not an M1a completion requirement.
+
+## M1b — live browser desktop
+
+Add the co-located .NET 10 broker, Keycloak and React/browser session package. Prove native 4K browser fidelity, streaming latency and live UI resolution changes from another machine. Screenshots alone cannot validate this milestone. Remote CLI API/auth design belongs here too; device flow supports operator login, while unattended credentials require a separate least-privilege decision.
 
 Spark is the proposed pilot because it currently has an X11 session and ARM64 is useful early coverage. Its encoder/4K capability is unverified. Hardware or production changes are not authorized by this bootstrap.
 
@@ -28,4 +32,4 @@ The fuller brief and source-research record are in Obsidian Me, Personal/DonkeyW
 
 ## Hard requirement added 2026-09-06
 
-The UI must change the actual remote desktop resolution while its session remains active. This is not browser scaling or encoder downsampling. M1 must demonstrate 3840×2160 -> 1920×1080 -> 3840×2160 without reconnecting the desktop or disrupting the terminal. Unsupported resize on the selected pilot blocks M1 completion.
+Actual remote desktop resolution must change during an active session: via CLI in M1a and via web UI in M1b. This is not browser scaling or encoder downsampling. Both demonstrate 3840×2160 -> 1920×1080 -> 3840×2160 without reconnecting the desktop or disrupting the terminal. Unsupported resize on the selected pilot blocks completion.

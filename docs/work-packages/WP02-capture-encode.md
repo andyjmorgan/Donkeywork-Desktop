@@ -1,32 +1,30 @@
-# WP02 — Linux capture and 4K encoding proof
+# WP02 — M1a Linux capture/stills/input; M1b video
 
 ## Outcome and ownership
 
-Prove an original capture/encode backend with measurable 3840×2160 behaviour. Own only `device/capture/`; branch `work/wp02-capture-encode`, separate worktree. WP01 owns worker lifecycle; WP03 owns browser rendering. Coordinate through contracts, not cross-directory edits.
+Own `device/capture/` on `work/wp02-capture-encode` in a separate worktree. M1a implements one original real capture source, lossless still encoding, input injection and actual mode switching. M1b adds video encoding to **the same source**, not an independent screenshot path. WP01 owns authorization/lifecycle; WP09 owns CLI commands.
 
-## Scope
+## M1a scope
 
-- Propose the in-process capture/encoder interface with WP01 as a contract amendment, then implement the approved interface. The v0.1.0 draft describes wire metadata, not Rust traits. Preserve explicit display identity, dimensions, scale, timestamps and codec capability reporting.
-- Establish one viable Linux capture path first. Identify X11, Wayland, permissions and headless limitations rather than claiming universal support.
-- Compare available browser-compatible codec paths for 4K motion and coloured text. Record actual chroma format, software/hardware encoder and fallback behaviour.
-- Support keyframe requests, bounded queues and capability/error reporting as agreed in contracts. Treat cursor capture/compositing consistently with the separate-cursor contract.
-- Keep lossless refinement an explicit later proposal unless the frozen contract includes it. 4:4:4 alone is not proof of losslessness.
-- Enumerate actual supported desktop modes as `availableResolutions` and implement live display mode changes through the approved interface behind `display.resize` / `display.resize.result`. A changed capture size, encoder size or browser scale alone is insufficient. Coordinate topology revision and decoder `streamGeneration` updates with WP01/WP03; reject stale input during the transition through the worker boundary. Preserve or restore the previous display mode and report a failed change visibly.
+- Propose and freeze the in-process capture/still/input/resize interface with WP01 through a contract PR. `contracts/local-cli.md` draft v0.2.0 supplies wire semantics, not implemented Rust traits.
+- Target an X11 pilot with RandR 1.2+, both required modes and usable capture/input permissions. Spark is a candidate, not a validated baseline. Document Wayland/headless limitations.
+- Capture native display frames and return a PNG from that source with accurate post-rotation dimensions, display identity, capture timestamp, cursor policy and topology revision. Respect contract payload caps and explicit oversize failure; never silently downsample.
+- Inject coordinate pointer, keyboard and text actions through the approved interface. Preserve physical pixel coordinates and reject out-of-bounds/stale topology at the worker boundary.
+- Enumerate supported modes and change actual OS display resolution in place. Serialize transition with capture/input, preserve/restore prior mode on failure where possible, and always report the actual resulting topology.
+- Do not shell out to a separate screenshot utility or add a second capture implementation for stills.
 
-Use original code and appropriately licensed dependencies; no RustDesk code, assets or translation. This package does not authorize software installation, graphical-session changes, driver changes or privileged capture on Spark or any lab host. Prepare a reviewable test invocation and identify the exact host access prerequisite first. No production changes.
+## M1b deferred scope
 
-## Prerequisites and blockers
+Add browser-compatible video encoding, keyframes, bounded queues, codec/chroma metadata and generation reconfiguration around the proven source. Compare hardware video and software full-chroma paths on measured hardware. Browser 4K60 and codecs are M1b proof, not M1a prerequisites. PNG refinement is a separate proposal. Never infer encoding support from GPU presence.
 
-Capture/encoder interface, timestamp semantics, codec bitstream format and keyframe/error messages must be frozen before implementation merges. Missing decisions require a contract PR. Synthetic generators can run locally while access to an approved display/encoder is unavailable. WP01 and WP03 are required for live end-to-end results.
+## Prerequisites and acceptance
 
-## Acceptance
+Freeze the v0.2.0 still/input interface and limits before merge. Real acceptance needs separately scoped access to an X11 display exposing `3840×2160` and `1920×1080`; missing capability is an M1a blocker. Test locally with synthetic frames until authorized; label that evidence.
 
-- Deterministic tests cover resolution metadata, capability fallback, frame lifetime, queue limits and keyframe signalling.
-- Record codec/profile/chroma, dimensions, frame rate, bitrate, encode timing, CPU/GPU load and workload. Mark synthetic measurements separately from physical-display capture.
-- Exercise terminal scrolling, small coloured text and motion; retain artifacts without credentials or private desktop content.
-- State whether 4K60 is achieved, under which conditions, and what prevents it elsewhere. Never infer hardware encoding from GPU presence.
-- On the approved pilot, verify actual OS/display resolution changes `3840×2160 → 1920×1080 → 3840×2160` during one desktop session, without reconnecting or interrupting its terminal. Publish evidence of actual display modes and stream reconfiguration. Unsupported live resize on the pilot is an M1 blocker, not an optional capability that can be skipped.
+Decode native-4K screenshots and verify exact reported dimensions, cursor policy, topology and bounded payload behavior. Use a known test pattern for corner-pixel input at both modes. Prove `3840×2160 → 1920×1080 → 3840×2160` independently from OS mode evidence, without reopening desktop or disrupting PTY. Test unsupported modes and failure/rollback reporting.
 
-## Handoff
+In M1b, compare a screenshot and decoded video from the same captured frame within codec tolerance, using matching source dimensions/cursor semantics. Record frame rate, bitrate, latency method and CPU/GPU load; no synthetic-to-hardware claims.
 
-Provide branch, commit SHA, contract-baseline SHA, commands/results, environment, benchmark artifacts, dependency/provenance notes, limitations and explicit blockers. Include the interface integration procedure for WP01 and decodable samples for WP03 using approved fixtures. If hardware access is missing, deliver the implementation and test plan with that result explicitly unverified.
+## Boundaries and handoff
+
+No host installation, driver/display modifications, privileged access or production changes are authorized by this package. Original code only; no RustDesk source/assets/adaptations. Provide branch, base/commit and contract SHA/version, commands/results, environment, artifacts, dependency provenance, actual-vs-synthetic evidence and explicit blockers. Coordinate WP01/WP09 first and WP03 only for M1b; own no other paths.

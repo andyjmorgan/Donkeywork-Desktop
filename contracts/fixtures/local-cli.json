@@ -1,0 +1,415 @@
+[
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.resumed",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "11111111-1111-4111-8111-111111111111",
+    "sessionEpoch": "11111111-1111-4111-8111-111111111111",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "lastAcceptedInputSequence": 0,
+      "lastResizeSequence": 0,
+      "latestOutputSequence": 0
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "describe",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "payload": {}
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "describe.result",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "workerId": "11111111-1111-4111-8111-111111111111",
+      "peerUid": 1000,
+      "osAccountProfile": "pilot",
+      "permissions": [
+        "desktop.view",
+        "desktop.control",
+        "desktop.resize",
+        "terminal.open",
+        "terminal.input"
+      ],
+      "displays": [
+        {
+          "displayId": "display-0",
+          "width": 3840,
+          "height": 2160,
+          "topologyRevision": 1,
+          "cursorEmbedded": false,
+          "canResize": true,
+          "availableResolutions": [
+            {
+              "width": 3840,
+              "height": 2160
+            },
+            {
+              "width": 1920,
+              "height": 1080
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "session.open",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "payload": {}
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "session.opened",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "state": "ready"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "session.close",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {}
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "control.acquire",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {}
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "control.granted",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "validForMs": 45000
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "control.renew",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "control.release",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "screenshot.request",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "displayId": "display-0",
+      "includeCursor": false
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "screenshot.result",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "snapshotId": "11111111-1111-4111-8111-111111111111",
+      "displayId": "display-0",
+      "topologyRevision": 1,
+      "width": 3840,
+      "height": 2160,
+      "format": "png",
+      "pixelFormat": "rgba8",
+      "cursorEmbedded": false,
+      "captureTimeUs": 2000,
+      "payloadBytes": 1024
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "input.pointer",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "snapshotId": "11111111-1111-4111-8111-111111111111",
+      "displayId": "display-0",
+      "topologyRevision": 1,
+      "inputSequence": 1,
+      "x": 3839,
+      "y": 2159,
+      "action": "click",
+      "button": "left"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "input.key",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "snapshotId": "11111111-1111-4111-8111-111111111111",
+      "displayId": "display-0",
+      "topologyRevision": 1,
+      "inputSequence": 1,
+      "usage": 4,
+      "action": "down"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "input.text",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "snapshotId": "11111111-1111-4111-8111-111111111111",
+      "displayId": "display-0",
+      "topologyRevision": 1,
+      "inputSequence": 1,
+      "text": "example"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "input.reset",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "inputSequence": 2
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "display.resize",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "leaseId": "11111111-1111-4111-8111-111111111111",
+      "displayId": "display-0",
+      "topologyRevision": 1,
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "display.resize.result",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "displayId": "display-0",
+      "status": "applied",
+      "width": 1920,
+      "height": 1080,
+      "topologyRevision": 2,
+      "reason": "none"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.open",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "rows": 1,
+      "cols": 1
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.opened",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "rows": 1,
+      "cols": 1
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.input",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "inputSequence": 1,
+      "bytesBase64": "aGVsbG8="
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.inputAck",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "inputSequence": 1
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.output",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "outputSequence": 1,
+      "bytesBase64": "aGVsbG8="
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.resize",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "resizeSequence": 1,
+      "rows": 1,
+      "cols": 1
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.resume",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "lastOutputSequence": 0
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.gap",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "earliestAvailableSequence": 1,
+      "latestSequence": 1
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.exit",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111",
+      "exitCode": 0,
+      "signal": null,
+      "finalOutputSequence": 0
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "terminal.close",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {
+      "terminalId": "11111111-1111-4111-8111-111111111111"
+    }
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "ack",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "sessionId": "22222222-2222-4222-8222-222222222222",
+    "sessionEpoch": "33333333-3333-4333-8333-333333333333",
+    "payload": {}
+  },
+  {
+    "protocol": "dwdesktop.local",
+    "version": "0.2.0",
+    "type": "error",
+    "messageId": "11111111-1111-4111-8111-111111111111",
+    "requestMessageId": "22222222-2222-4222-8222-222222222222",
+    "payload": {
+      "code": "forbidden",
+      "message": "Operation denied",
+      "retryable": false
+    }
+  }
+]
