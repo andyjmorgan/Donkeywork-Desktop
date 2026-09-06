@@ -1,0 +1,779 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://donkeywork.dev/desktop/contracts/0.1.0/control.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "worker.describe"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "worker.capabilities"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "workerId",
+            "desktop",
+            "terminal",
+            "clipboard",
+            "resizeDisplay",
+            "displays",
+            "protocolVersions",
+            "requestMessageId"
+          ],
+          "properties": {
+            "workerId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "desktop": {
+              "type": "boolean"
+            },
+            "terminal": {
+              "type": "boolean"
+            },
+            "clipboard": {
+              "type": "boolean"
+            },
+            "resizeDisplay": {
+              "type": "boolean"
+            },
+            "displays": {
+              "type": "array",
+              "items": {
+                "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/display"
+              },
+              "maxItems": 16
+            },
+            "protocolVersions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              }
+            },
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "session.create"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestId",
+            "kind",
+            "principal",
+            "permissions",
+            "osAccountProfile"
+          ],
+          "properties": {
+            "requestId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "kind": {
+              "enum": [
+                "desktop",
+                "terminal"
+              ]
+            },
+            "principal": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/principal"
+            },
+            "permissions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 7,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/permission"
+              }
+            },
+            "osAccountProfile": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "session.created"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestId",
+            "sessionId",
+            "sessionEpoch",
+            "state",
+            "requestMessageId"
+          ],
+          "properties": {
+            "requestId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "state": {
+              "const": "ready"
+            },
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "attachment.prepare"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "principal",
+            "permissions",
+            "grantHash",
+            "validForMs"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "principal": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/principal"
+            },
+            "permissions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 7,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/permission"
+              }
+            },
+            "grantHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "validForMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "attachment.redeem"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "principal",
+            "grant"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "principal": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/principal"
+            },
+            "grant": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{43}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "attachment.authorized"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "attachmentId",
+            "sessionId",
+            "sessionEpoch",
+            "authorizationTtlMs",
+            "requestMessageId"
+          ],
+          "properties": {
+            "attachmentId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "authorizationTtlMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 45000
+            },
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "attachment.renew"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "attachmentId",
+            "authorizationTtlMs"
+          ],
+          "properties": {
+            "attachmentId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "authorizationTtlMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 45000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "attachment.revoke"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "attachmentId",
+            "reason"
+          ],
+          "properties": {
+            "attachmentId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "reason": {
+              "enum": [
+                "logout",
+                "policy",
+                "expired",
+                "operator"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "session.close"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "reason"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "reason": {
+              "enum": [
+                "user",
+                "revoked",
+                "expired",
+                "shutdown",
+                "failed"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "control.acquire"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "attachmentId",
+            "actor",
+            "takeover"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "attachmentId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "actor": {
+              "enum": [
+                "human",
+                "agent"
+              ]
+            },
+            "takeover": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "control.granted"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "attachmentId",
+            "leaseId",
+            "validForMs",
+            "requestMessageId"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "attachmentId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "leaseId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "validForMs": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 45000
+            },
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "control.release"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sessionId",
+            "sessionEpoch",
+            "leaseId"
+          ],
+          "properties": {
+            "sessionId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "sessionEpoch": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "leaseId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "error"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestMessageId",
+            "error"
+          ],
+          "properties": {
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            },
+            "error": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/error"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "version",
+        "type",
+        "messageId",
+        "payload"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "dwdesktop"
+        },
+        "version": {
+          "const": "0.1.0"
+        },
+        "type": {
+          "const": "control.ack"
+        },
+        "messageId": {
+          "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestMessageId"
+          ],
+          "properties": {
+            "requestMessageId": {
+              "$ref": "https://donkeywork.dev/desktop/contracts/0.1.0/common.schema.json#/$defs/id"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
