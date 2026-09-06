@@ -1,0 +1,11 @@
+[package]
+name = "dwdesktop-capture"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+png = "0.18"
+x11rb = { version = "0.13", features = ["randr", "xtest", "xkb"] }
+x11rb-protocol = "0.13"
+rustix = { version = "1", features = ["event"] }
