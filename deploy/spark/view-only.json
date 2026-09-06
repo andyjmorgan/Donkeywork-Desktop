@@ -1,0 +1,8 @@
+{
+  "socket_path": "/run/user/1000/dwdesktop-alpha/cli.sock",
+  "worker_id": "f0d51cd9-2c17-47c5-ae39-9d1aef3cbb53",
+  "backend": { "kind": "x11", "display": ":0" },
+  "policies": [
+    { "uid": 1000, "profile": "pilot", "permissions": ["desktop.view"] }
+  ]
+}
