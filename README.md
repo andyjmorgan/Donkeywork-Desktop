@@ -2,7 +2,7 @@
 
 Linux console and terminal access, starting with an authenticated agent CLI and followed by an original Keycloak-authenticated web console.
 
-**Status: contract and work-package bootstrap. No runnable desktop implementation yet.**
+**Status: initial Rust daemon, X11 backend and CLI implemented; integration and Spark validation underway. PTY and browser are not yet integrated.**
 
 M1a proves a Rust daemon and local Unix-socket CLI on one X11 pilot: native-4K PNG screenshots, clicks/keyboard input, actual live resolution changes and a real PTY. Explicit peer-UID policy authorizes access; no broker, browser or public endpoint is needed for that first slice. M1b adds the .NET broker, Keycloak and browser streaming, including mandatory live resolution changes from the UI. Move the broker to attic and enroll the fleet only after this engine is proven.
 

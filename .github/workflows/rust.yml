@@ -1,0 +1,16 @@
+name: Rust components
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [device/core, device/capture, cli]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - run: rustup toolchain install 1.98.1 --profile minimal --no-self-update
+      - run: cargo +1.98.1 test --locked --manifest-path ${{ matrix.component }}/Cargo.toml
