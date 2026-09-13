@@ -1,5 +1,6 @@
 use crate::*;
 use std::time::{Duration, Instant};
+use x11rb::connection::Connection;
 use x11rb::protocol::{
     randr::{self, ConnectionExt as _, GetCrtcInfoReply, Rotation},
     xproto::ConnectionExt as _,
@@ -18,6 +19,7 @@ fn transact(transaction: &mut impl ModeTransaction) -> Result<ResizeOutcome> {
     let applied = transaction
         .apply()
         .and_then(|_| transaction.confirm_applied())
+        .inspect_err(|error| trace_resize_error("apply/confirm", error))
         .unwrap_or(false);
     let status = if applied {
         ResizeStatus::Applied
@@ -25,6 +27,7 @@ fn transact(transaction: &mut impl ModeTransaction) -> Result<ResizeOutcome> {
         let restored = transaction
             .restore()
             .and_then(|_| transaction.confirm_restored())
+            .inspect_err(|error| trace_resize_error("restore/confirm", error))
             .unwrap_or(false);
         ResizeStatus::Rejected(if restored {
             ResizeRejection::OsFailed
@@ -36,6 +39,14 @@ fn transact(transaction: &mut impl ModeTransaction) -> Result<ResizeOutcome> {
         status,
         topology: transaction.actual_topology()?,
     })
+}
+
+// Explicit operator diagnostics only. Resize errors contain local X11 protocol
+// details and static backend/authorization messages, never input or image bodies.
+fn trace_resize_error(stage: &str, error: &BackendError) {
+    if std::env::var("DW_DESKTOP_RESIZE_TRACE").as_deref() == Ok("1") {
+        eprintln!("dwdesktop-capture resize {stage}: {error}");
+    }
 }
 
 struct SavedMode {
@@ -64,9 +75,22 @@ impl X11Backend {
         requested: Resolution,
         guard: &mut dyn ActionGuard,
     ) -> Result<ResizeOutcome> {
-        self.connection
-            .stream()
-            .arm(Instant::now() + Duration::from_secs(5));
+        let result = self.resize_inner(expected_revision, display_id, requested, guard);
+        if let Err(error) = &result {
+            trace_resize_error("preflight/final-topology", error);
+        }
+        result
+    }
+
+    fn resize_inner(
+        &mut self,
+        expected_revision: u64,
+        display_id: &str,
+        requested: Resolution,
+        guard: &mut dyn ActionGuard,
+    ) -> Result<ResizeOutcome> {
+        let preflight_deadline = Instant::now() + Duration::from_secs(5);
+        self.connection.stream().arm(preflight_deadline);
         guard.check()?;
         let display = self.checked_display(expected_revision, display_id)?;
         let rejected = |topology| {
@@ -145,31 +169,22 @@ impl X11Backend {
         else {
             return rejected(self.topology()?);
         };
+        // The legacy GetScreenInfo rates reply fails decoding on the pilot.
+        // A fresh authenticated setup reports current root physical dimensions;
+        // using the long-lived connection's setup would restore stale dimensions
+        // after the first resize. No legacy API/version negotiation is needed.
+        let (fresh, fresh_screen) =
+            crate::transport::connect_until(self.display_name.as_deref(), preflight_deadline)?;
+        let screen = &fresh.setup().roots[fresh_screen];
         let geometry = self
             .connection
             .get_geometry(self.root)
             .map_err(BackendError::os)?
             .reply()
             .map_err(BackendError::os)?;
-        let screen_info = self
-            .connection
-            .randr_get_screen_info(self.root)
-            .map_err(BackendError::os)?
-            .reply()
-            .map_err(BackendError::os)?;
-        let Some(size) = screen_info.sizes.get(usize::from(screen_info.size_id)) else {
-            return Err(BackendError::new(
-                ErrorKind::Unsupported,
-                "cannot snapshot root physical dimensions",
-            ));
-        };
-        if size.width != geometry.width
-            || size.height != geometry.height
-            || size.mwidth == 0
-            || size.mheight == 0
-        {
-            return rejected(self.topology()?);
-        }
+        let (mm_width, mm_height) =
+            root_physical_dimensions(screen, self.root, geometry.width, geometry.height)?;
+        drop(fresh);
         self.checked_display(expected_revision, display_id)?;
         guard.check()?;
         self.release_all()?;
@@ -181,8 +196,8 @@ impl X11Backend {
             crtc,
             width: geometry.width,
             height: geometry.height,
-            mm_width: size.mwidth.into(),
-            mm_height: size.mheight.into(),
+            mm_width,
+            mm_height,
         };
         let mut transaction = X11Transaction {
             backend: self,
@@ -195,6 +210,37 @@ impl X11Backend {
         };
         transact(&mut transaction)
     }
+}
+
+fn root_physical_dimensions(
+    screen: &x11rb::protocol::xproto::Screen,
+    expected_root: u32,
+    width: u16,
+    height: u16,
+) -> Result<(u32, u32)> {
+    if screen.root != expected_root
+        || screen.width_in_pixels != width
+        || screen.height_in_pixels != height
+    {
+        return Err(BackendError::new(
+            ErrorKind::StaleTopology,
+            "root geometry changed during resize preflight",
+        ));
+    }
+    if width == 0
+        || height == 0
+        || screen.width_in_millimeters == 0
+        || screen.height_in_millimeters == 0
+    {
+        return Err(BackendError::new(
+            ErrorKind::Unsupported,
+            "current root physical dimensions are unavailable",
+        ));
+    }
+    Ok((
+        screen.width_in_millimeters.into(),
+        screen.height_in_millimeters.into(),
+    ))
 }
 
 impl X11Transaction<'_> {
@@ -368,6 +414,61 @@ impl ModeTransaction for X11Transaction<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn screen(
+        width: u16,
+        height: u16,
+        mm_width: u16,
+        mm_height: u16,
+    ) -> x11rb::protocol::xproto::Screen {
+        x11rb::protocol::xproto::Screen {
+            root: 42,
+            width_in_pixels: width,
+            height_in_pixels: height,
+            width_in_millimeters: mm_width,
+            height_in_millimeters: mm_height,
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn resize_snapshots_current_mm_after_previous_resize_without_legacy_rates() {
+        let initial = screen(3840, 2160, 1016, 571);
+        let refreshed = screen(1920, 1080, 508, 285);
+        assert_eq!(
+            root_physical_dimensions(&initial, 42, 3840, 2160).unwrap(),
+            (1016, 571)
+        );
+        assert_eq!(
+            root_physical_dimensions(&refreshed, 42, 1920, 1080).unwrap(),
+            (508, 285)
+        );
+        assert_eq!(
+            root_physical_dimensions(&initial, 42, 1920, 1080)
+                .unwrap_err()
+                .kind,
+            ErrorKind::StaleTopology
+        );
+    }
+    #[test]
+    fn mismatched_or_missing_root_dimensions_fail_before_mutation() {
+        assert_eq!(
+            root_physical_dimensions(&screen(3840, 2160, 1016, 571), 99, 3840, 2160)
+                .unwrap_err()
+                .kind,
+            ErrorKind::StaleTopology
+        );
+        assert_eq!(
+            root_physical_dimensions(&screen(3840, 2160, 0, 571), 42, 3840, 2160)
+                .unwrap_err()
+                .kind,
+            ErrorKind::Unsupported
+        );
+        assert_eq!(
+            root_physical_dimensions(&screen(3840, 2160, 1016, 0), 42, 3840, 2160)
+                .unwrap_err()
+                .kind,
+            ErrorKind::Unsupported
+        );
+    }
     struct Fake {
         apply_ok: bool,
         confirm_ok: bool,

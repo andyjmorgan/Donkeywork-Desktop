@@ -1,6 +1,11 @@
-# WP06 — M1b original DonkeyWork web console (deferred)
+# WP06 — M2 original DonkeyWork fleet web console
 
-This package is deferred to M1b and is not an M1a dependency or initial dispatch lane. M1a's user/agent interface is WP09's local CLI. M1b adds the browser view around the same proven capture/input/PTY backend; it does not replace M1a's capture source.
+The local prototype is complete and remains a reference implementation. M2
+turns it into the authenticated fleet console, following DonkeyWork Agents and
+the Obsidian light/dark themes.
+
+M2 adds the browser view around the same proven capture/input/PTY backend; it
+does not replace the M1 device capture source or local CLI.
 
 ## Outcome and ownership
 

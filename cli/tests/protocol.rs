@@ -386,6 +386,117 @@ fn fixture_context(f: &Fixture) -> (std::path::PathBuf, std::path::PathBuf) {
 }
 
 #[test]
+fn modifier_chord_orders_events_in_one_lease_and_releases_reverse() {
+    let f = Fixture::new();
+    let (context, snapshot) = fixture_context(&f);
+    let listener = f.listener.try_clone().unwrap();
+    let server = thread::spawn(move || {
+        let (mut s, _) = listener.accept().unwrap();
+        let acquire = read_record(&mut s).unwrap().header;
+        assert_eq!(acquire["type"], "control.acquire");
+        write_record(
+            &mut s,
+            &reply(
+                &acquire,
+                "control.granted",
+                json!({"leaseId":LEASE,"validForMs":45000}),
+            ),
+        )
+        .unwrap();
+        let expected = [
+            (224, "down"),
+            (226, "down"),
+            (59, "down"),
+            (59, "up"),
+            (226, "up"),
+            (224, "up"),
+        ];
+        for (index, (usage, action)) in expected.iter().enumerate() {
+            let event = read_record(&mut s).unwrap().header;
+            assert_eq!(event["type"], "input.key");
+            assert_eq!(event["payload"]["leaseId"], LEASE);
+            assert_eq!(event["payload"]["usage"], *usage);
+            assert_eq!(event["payload"]["action"], *action);
+            assert_eq!(event["payload"]["inputSequence"], index as u64 + 1);
+            assert_eq!(event["payload"]["snapshotId"], LEASE);
+            write_record(&mut s, &reply(&event, "ack", json!({}))).unwrap();
+        }
+        let release = read_record(&mut s).unwrap().header;
+        assert_eq!(release["type"], "control.release");
+        write_record(&mut s, &reply(&release, "ack", json!({}))).unwrap();
+        let mut byte = [0];
+        assert_eq!(s.read(&mut byte).unwrap(), 0);
+    });
+    let out = f
+        .command()
+        .arg("key")
+        .arg("--context")
+        .arg(context)
+        .arg("--snapshot")
+        .arg(snapshot)
+        .args(["--usage", "59", "--modifiers", "ctrl,alt"])
+        .output()
+        .unwrap();
+    server.join().unwrap();
+    assert!(out.status.success());
+}
+
+#[test]
+fn failed_modifier_chord_disconnects_for_cleanup_without_replaying() {
+    let f = Fixture::new();
+    let (context, snapshot) = fixture_context(&f);
+    let listener = f.listener.try_clone().unwrap();
+    let server = thread::spawn(move || {
+        let (mut s, _) = listener.accept().unwrap();
+        let acquire = read_record(&mut s).unwrap().header;
+        write_record(
+            &mut s,
+            &reply(
+                &acquire,
+                "control.granted",
+                json!({"leaseId":LEASE,"validForMs":45000}),
+            ),
+        )
+        .unwrap();
+        let first = read_record(&mut s).unwrap().header;
+        assert_eq!(first["payload"]["usage"], 226);
+        write_record(&mut s, &reply(&first, "ack", json!({}))).unwrap();
+        let second = read_record(&mut s).unwrap().header;
+        assert_eq!(second["payload"]["usage"], 225);
+        write_record(
+            &mut s,
+            &reply(
+                &second,
+                "error",
+                json!({"code":"capture_failed","message":"injection failed","retryable":false}),
+            ),
+        )
+        .unwrap();
+        // EOF is the protocol cleanup boundary: daemon releases the first held
+        // modifier. No later key events, retries or second connection occur.
+        let mut byte = [0];
+        assert_eq!(s.read(&mut byte).unwrap(), 0);
+    });
+    let out = f
+        .command()
+        .arg("key")
+        .arg("--context")
+        .arg(context)
+        .arg("--snapshot")
+        .arg(snapshot)
+        .args(["--usage", "59", "--modifier", "alt", "--modifier", "shift"])
+        .output()
+        .unwrap();
+    server.join().unwrap();
+    assert!(!out.status.success());
+    assert!(out.stdout.is_empty());
+    assert_eq!(
+        serde_json::from_slice::<Value>(&out.stderr).unwrap()["code"],
+        "capture_failed"
+    );
+}
+
+#[test]
 fn stale_snapshot_error_stops_input_without_retry() {
     let f = Fixture::new();
     let (context, snapshot) = fixture_context(&f);

@@ -1,0 +1,8 @@
+.broker-main { gap: 24px; }
+.broker-create,.broker-card,.broker-empty { padding:24px; border:1px solid #ffffff18; border-radius:16px; background:#ffffff04; }
+.broker-create,.broker-card { display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+.broker-create h2,.broker-card h2,.broker-empty h2 { margin:0 0 8px; font-size:20px; }
+.broker-create p,.broker-card p,.broker-empty p { opacity:.7; }
+.broker-create label { display:flex; flex-direction:column; gap:8px; font-size:13px; }
+.broker-create select { background:var(--surface,#151b22); color:inherit; padding:12px; border:1px solid #78889960; border-radius:8px; min-width:230px; }
+.broker-list { display:grid; gap:16px; }

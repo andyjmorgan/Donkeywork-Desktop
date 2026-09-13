@@ -2,9 +2,12 @@ node_modules/
 coverage/
 TestResults/
 **/bin/
+!**/src/bin/
+!**/src/bin/**
 **/obj/
 **/target/
 **/dist/
+**/dist-manager/
 .env
 .env.*
 !.env.example
@@ -12,3 +15,5 @@ TestResults/
 *.key
 .worktrees/
 artifacts/
+__pycache__/
+authorized_tokens.json

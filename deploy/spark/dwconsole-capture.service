@@ -1,0 +1,18 @@
+[Unit]
+Description=DonkeyWork physical X11 console tap (Spark pilot)
+After=display-manager.service
+StartLimitIntervalSec=0
+
+[Service]
+ExecStart=/opt/donkeywork-desktop/bin/start-console-x11.sh
+Restart=always
+RestartSec=3
+TimeoutStopSec=8
+RuntimeDirectory=dwconsole
+RuntimeDirectoryMode=0700
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

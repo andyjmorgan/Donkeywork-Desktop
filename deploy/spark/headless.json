@@ -1,0 +1,8 @@
+{
+  "socket_path": "/run/dwdesktop/cli.sock",
+  "worker_id": "8cdf2177-bd0e-4da1-8c77-a464dc4a3c7b",
+  "backend": { "kind": "x11", "display": ":99" },
+  "policies": [
+    { "uid": 994, "profile": "headless-poc", "permissions": ["desktop.view", "desktop.control", "desktop.resize"] }
+  ]
+}

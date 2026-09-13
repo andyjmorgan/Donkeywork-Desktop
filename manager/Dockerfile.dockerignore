@@ -1,0 +1,13 @@
+**
+!manager/
+!manager/**
+!packaging/
+!packaging/agent/
+!packaging/agent/**
+!console-ui/
+!console-ui/**
+console-ui/node_modules
+console-ui/dist
+console-ui/dist-manager
+manager/*.key
+manager/*.pem

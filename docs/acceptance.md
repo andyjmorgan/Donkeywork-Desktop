@@ -1,5 +1,11 @@
 # M1 acceptance
 
+2026-09-06: Andrew accepted session startup/application launch as sufficient POC success to begin web UI development. This is an explicit sequencing decision, not a claim that all M1a gates below passed. See [web console start](web-console-start.md).
+
+## POC target amendment
+
+The approved first target is one managed Xorg dummy-driver desktop as `dwdesktop` on Spark, not the existing physical console. M1a mode verification therefore checks genuine virtual output modes and states this in evidence. Physical-console capture/mode switching remains unproven. See [session decision](decisions-headless-poc.md); Fable calls this protocol proof M0. All input/auth/frame/session invariants still apply. Full PTY continuity cannot pass until the PTY backend is wired through core and CLI.
+
 ## M1a required acceptance — CLI and daemon
 
 - On an explicitly authorized X11 pilot, run describe -> screenshot -> click a known test target -> screenshot verifying the effect. Test keyboard input without replaying uncertain actions.
@@ -10,9 +16,10 @@
 - CLI emits structured results, nonzero failures and private screenshot files. Tests use synthetic non-sensitive desktop content; screenshots are sensitive artifacts, not audit logs.
 - No loopback mock can satisfy actual desktop acceptance. No 4K streaming/browser-performance claim follows from PNG capture. Lab display changes need separately scoped approval.
 
-## M1b required acceptance — browser and remote authentication
+## M2 required acceptance — browser and remote authentication
 
-The following browser/streaming criteria apply to M1b, not to the local-only M1a slice.
+The following browser/streaming criteria apply to M2, not to the completed
+local-only M1a/prototype slice.
 
 No measurements exist yet. 3840×2160 native viewing and usable text are required; 60 fps is a target on a declared capable baseline. A proposed p95 input-to-photon LAN target is <100 ms, subject to Andrew's review and a measurement method that includes capture/encode/network/decode/render. Do not report software timestamp deltas as complete input-to-photon measurements.
 

@@ -1,0 +1,27 @@
+[Unit]
+Description=DonkeyWork Desktop device connection
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=dwdesktop-agent
+Group=dwdesktop-agent
+ExecStart=/opt/donkeywork-desktop-agent/current/dwdesktop-agent run --state-dir /var/lib/dwdesktop-agent
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+# AF_NETLINK permits WebRTC interface discovery; capabilities remain empty.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+CapabilityBoundingSet=
+ReadOnlyPaths=/var/lib/dwdesktop-agent
+
+[Install]
+WantedBy=multi-user.target

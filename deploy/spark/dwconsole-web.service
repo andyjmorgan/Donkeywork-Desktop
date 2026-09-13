@@ -1,0 +1,18 @@
+[Unit]
+Description=DonkeyWork console web viewer (Spark pilot)
+Wants=dwconsole-capture.service network-online.target
+After=dwconsole-capture.service network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+ExecStart=/opt/donkeywork-desktop/bin/web-launch --socket /run/dwconsole/stream.sock --executable /opt/donkeywork-desktop/bin/console-web --uid 65534 --gid 65534 -- --stream-fd 0 --listen 192.168.69.28:8090 --ice-listen 192.168.69.28:8091 --origin http://192.168.69.28:8090 --assets /opt/donkeywork-desktop/web
+Restart=always
+RestartSec=3
+TimeoutStopSec=8
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

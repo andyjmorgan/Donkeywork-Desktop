@@ -1,0 +1,27 @@
+[Unit]
+Description=DonkeyWork dedicated Ubuntu GNOME virtual desktop
+Requires=dwdesktop-headless-xorg.service
+After=dwdesktop-headless-xorg.service
+PartOf=dwdesktop-headless.target dwdesktop-headless-xorg.service
+
+[Service]
+Type=simple
+User=dwdesktop
+Group=dwdesktop
+Environment=DISPLAY=:99
+Environment=XAUTHORITY=/run/dwdesktop/Xauthority
+Environment=XDG_RUNTIME_DIR=/run/dwdesktop
+UMask=0077
+ExecStart=/usr/bin/dbus-run-session -- /bin/bash /opt/donkeywork-desktop/headless/session.sh
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+KillMode=control-group
+NoNewPrivileges=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/dwdesktop /run/dwdesktop /tmp
+
+[Install]
+WantedBy=dwdesktop-headless.target

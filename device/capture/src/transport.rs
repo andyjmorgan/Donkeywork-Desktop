@@ -77,6 +77,14 @@ impl Stream for DeadlineStream {
 }
 
 pub(crate) fn connect(display: Option<&str>) -> Result<(RustConnection<DeadlineStream>, usize)> {
+    connect_until(display, Instant::now() + Duration::from_secs(5))
+}
+
+pub(crate) fn connect_until(
+    display: Option<&str>,
+    deadline: Instant,
+) -> Result<(RustConnection<DeadlineStream>, usize)> {
+    crate::x11::check_deadline(deadline)?;
     let parsed = x11rb_protocol::parse_display::parse_display(display)
         .map_err(|_| BackendError::new(ErrorKind::Unavailable, "invalid configured X11 display"))?;
     let screen = usize::from(parsed.screen);
@@ -98,7 +106,7 @@ pub(crate) fn connect(display: Option<&str>) -> Result<(RustConnection<DeadlineS
         let (auth_name, auth_data) = auth.unwrap_or_default();
         let stream = DeadlineStream {
             inner,
-            deadline: Mutex::new(Instant::now() + Duration::from_secs(5)),
+            deadline: Mutex::new(deadline),
         };
         return RustConnection::connect_to_stream_with_auth_info(
             stream, screen, auth_name, auth_data,

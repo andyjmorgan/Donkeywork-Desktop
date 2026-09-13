@@ -1,0 +1,7 @@
+[Unit]
+Description=DonkeyWork dedicated-user headless proof of concept
+Requires=dwdesktop-headless-xorg.service dwdesktop-headless-session.service dwdesktop-headless-core.service
+After=dwdesktop-headless-xorg.service dwdesktop-headless-session.service dwdesktop-headless-core.service
+
+[Install]
+WantedBy=multi-user.target

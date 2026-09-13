@@ -1,0 +1,6 @@
+[
+  { "button": "wheel_up", "x11Button": 4 },
+  { "button": "wheel_down", "x11Button": 5 },
+  { "button": "wheel_left", "x11Button": 6 },
+  { "button": "wheel_right", "x11Button": 7 }
+]

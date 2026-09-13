@@ -14,6 +14,14 @@ const validate = ajv.compile(schema);
 const examples = read('contracts/fixtures/local-cli.json');
 for (const message of examples) test(`local CLI accepts ${message.type}`, () => assert.ok(validate(message), ajv.errorsText(validate.errors)));
 
+test('managed X11 wheel detents extend pointer click buttons explicitly', () => {
+  const pointer = examples.find(x => x.type === 'input.pointer');
+  for (const fixture of read('contracts/fixtures/local-wheel.json')) {
+    assert.ok(validate({ ...pointer, payload: { ...pointer.payload, action: 'click', button: fixture.button } }));
+  }
+  assert.equal(validate({ ...pointer, payload: { ...pointer.payload, button: 'wheel_diagonal' } }), false);
+});
+
 test('local CLI has one example per variant, separate protocol and strict fields', () => {
   assert.deepEqual(examples.map(x => x.type).sort(), schema.oneOf.map(x => x.properties.type.const).sort());
   for (const message of examples) {

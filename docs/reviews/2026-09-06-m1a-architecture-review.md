@@ -64,7 +64,7 @@ Acceptance tests: click each extreme corner pixel at 4K and at 1080p and verify 
 
 The hard resize requirement (3840×2160 → 1920×1080 → 3840×2160, session and PTY preserved) is generically achievable only on X11 via RandR. Wayland has no cross-compositor client protocol for changing output modes; it needs compositor-specific interfaces or a virtual output. The docs already list Wayland/headless as unresolved — the resize requirement quietly resolves it: M1 targets X11. Say so. Separately, Spark's mode list, EDID situation and 4K behaviour are unverified, and RandR only offers modes the connected monitor (or a forced/dummy configuration) advertises. 1920×1080 may be absent on some panels.
 
-Amendment: record "M1 pilot requires an X11 session with RandR 1.2+" in architecture.md. Authorize a bounded, read-only spike on the pilot: capture `xrandr --query` output, confirm both required modes exist, measure mode-switch time, and confirm the session and running clients survive the switch. Publish the evidence before freezing the baseline.
+Amendment (updated 2026-09-06, see the display-model note): the resolution of this item has changed. A parallel implementer hit the XWayland blocker — on a Wayland console, X11 capture sees only XWayland clients, XTEST does not reach native Wayland windows, and RandR through XWayland is surface scaling, not a real mode change (the forbidden case). The adopted answer is not to pin the physical console to X11 but to run M0 against a dedicated service user in a headless Xorg-on-dummy-driver session. There, capture/XTEST/RandR are native, resize is a genuine dummy mode-set that satisfies the contract, and there is no desktop-environment display daemon (mutter, kscreen) to fight. The physical-console readback-and-RandR path (Model A) stays unproven and out of scope. Record in architecture.md: "M0 remotes a brokered virtual session (Xorg on a dummy display driver), not the physical console." Full reasoning, tradeoffs and the login consequences are in docs/reviews/2026-09-06-display-model-and-login-note.md.
 
 Acceptance tests: independently captured xrandr output before and after each transition matches `display.resize.result`; the PTY started before the sequence still accepts input after it; an unsupported requested mode returns rejected with the actual current mode.
 
@@ -124,6 +124,16 @@ This exercises every high-risk seam — capture fidelity at native 4K, coordinat
 - independently verified xrandr evidence around the resize sequence; PTY continuity (item 5)
 - lease deadline release, revoke interruption, view-only cannot control (item 8)
 - existing acceptance.md resolution test remains authoritative; M1a runs it from the CLI instead of the web UI
+
+## Addendum: worker session placement (2026-09-06 discussion)
+
+The daemon-to-user-session boundary needs an explicit decision, analogous to Windows Session 0 services spawning a helper into the user session (CreateProcessAsUser). On Linux, X access is credential-based: for M1a the single worker attaches to the console session's X server using its Xauthority cookie — no helper process needed. Structure the worker so all session-facing code (capture, XTEST, RandR, window events, later AT-SPI) sits behind one internal seam. In multi-session mode (M4) that half becomes a per-session helper spawned as the session user via logind/PAM, leaving the daemon with policy and the socket only. Decide cookie acquisition (root read of the user's Xauthority vs xhost SI:localuser grant) in WP01's design and document it; do not scatter DISPLAY/XAUTHORITY assumptions through the codebase.
+
+Boot ordering: the worker starts before any user session exists (reboot, logout). "No console session" is a normal running state, not a startup failure — the worker subscribes to logind and attaches when a session appears, detaches cleanly when it dies (epoch invalidation), and serves terminal-only meanwhile. Recommended pilot configuration: autologin into a locked session, so a rebooted host is remotely reachable (desktop at the locker, unlockable remotely) without giving the physical console a credential-free desktop.
+
+## Scope decisions from review discussion (Andrew, 2026-09-06)
+
+- Single monitor only for the agent use case. Multi-monitor stays structurally supported by the contract (displayId, per-display topology/streams — do not collapse displayId into "the display") but gets no implementation effort, testing or acceptance evidence. Revisit only if a human-console use case demands it.
 
 ## Explicitly out of scope for this review
 

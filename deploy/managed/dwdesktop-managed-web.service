@@ -1,0 +1,14 @@
+[Unit]
+Description=DonkeyWork Desktop local managed and console broker
+
+[Service]
+EnvironmentFile=%h/.config/dwdesktop/broker.env
+ExecStart=/usr/bin/python3 %h/.local/state/dwdesktop-managed/broker.py %h/.local/state/dwdesktop-managed --host ${DWDESKTOP_ADDRESS} --socket /run/dwdesktop-session/broker.sock
+Restart=on-failure
+RestartSec=2
+KillMode=control-group
+TimeoutStopSec=10
+UMask=0007
+
+[Install]
+WantedBy=default.target

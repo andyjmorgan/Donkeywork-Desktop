@@ -73,6 +73,10 @@ fn input(raw: Input) -> backend::Result<capture::InputAction> {
                 "left" => Some(capture::Button::Left),
                 "middle" => Some(capture::Button::Middle),
                 "right" => Some(capture::Button::Right),
+                "wheel_up" if action == "click" => Some(capture::Button::WheelUp),
+                "wheel_down" if action == "click" => Some(capture::Button::WheelDown),
+                "wheel_left" if action == "click" => Some(capture::Button::WheelLeft),
+                "wheel_right" if action == "click" => Some(capture::Button::WheelRight),
                 "none" => None,
                 _ => return Err("invalid_argument"),
             };
@@ -203,6 +207,17 @@ impl Backend for X11Adapter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn wheel_detents_are_clicks_never_held_buttons() {
+        for (name, button) in [("wheel_up", capture::Button::WheelUp),
+                               ("wheel_down", capture::Button::WheelDown),
+                               ("wheel_left", capture::Button::WheelLeft),
+                               ("wheel_right", capture::Button::WheelRight)] {
+            assert_eq!(input(Input::Pointer { x: 10, y: 20, action: "click".into(), button: name.into() }).unwrap(),
+                       capture::InputAction::Pointer { x: 10, y: 20, action: capture::PointerAction::Click(button) });
+            assert!(input(Input::Pointer { x: 10, y: 20, action: "down".into(), button: name.into() }).is_err());
+        }
+    }
     #[test]
     fn maps_input_without_changing_coordinates_or_semantics() {
         assert_eq!(

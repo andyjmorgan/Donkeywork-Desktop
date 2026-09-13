@@ -1,0 +1,19 @@
+[Unit]
+Description=DonkeyWork Desktop VKMS active-session supervisor
+PartOf=donkeywork-desktop.target
+After=network-online.target display-manager.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+UMask=0077
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/python3 /opt/donkeywork-desktop/current/libexec/package-runner.py session-supervisor
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=12
+KillMode=control-group
+NoNewPrivileges=yes
+ProtectHome=read-only
+PrivateTmp=no

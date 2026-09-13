@@ -1,0 +1,11 @@
+# Documentation template only; installer emits strict KEY=value configuration.
+PROFILE=vkms
+CONTROL=auto
+LISTEN_IP=192.168.69.21
+DRM_DEVICE=auto
+WIDTH=1920
+HEIGHT=1080
+BIN_DIR=/opt/donkeywork-desktop/current/bin
+ASSETS=/opt/donkeywork-desktop/current/share/web
+LIBEXEC_DIR=/opt/donkeywork-desktop/current/libexec
+FFMPEG=/usr/bin/ffmpeg

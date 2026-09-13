@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=DonkeyWork Desktop console agent
+Exec=/home/localuser/.local/lib/dwdesktop/desktop-agent-start
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

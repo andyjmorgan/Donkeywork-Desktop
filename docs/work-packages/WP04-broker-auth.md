@@ -1,6 +1,11 @@
-# WP04 — M1b .NET broker, Keycloak and session grants (deferred)
+# WP04 — M2 .NET broker, Keycloak and fleet authorization
 
-This is M1b work, not an M1a dependency or initial dispatch lane. M1a authenticates its local CLI using verified Unix peer UID, an allowlist and fixed permissions/account profile on a dedicated local API; it requires no Keycloak, broker HTTP API, remote OAuth or browser grants. Do not expose the raw privileged broker socket through the CLI path. Add the reviewed broker trust boundary separately when M1b starts.
+> Superseded for the current milestone by [the internal Go/PostgreSQL manager](../milestones/M3-internal-manager.md).
+> Keycloak and public access are explicitly deferred. The text below is historical.
+
+The local `.8` daemon/CLI and single-device browser prototype are complete.
+This package starts M2: the authenticated fleet control plane. Do not expose
+the raw privileged worker socket through the browser path.
 
 ## Outcome and ownership
 

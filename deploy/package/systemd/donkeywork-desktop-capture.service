@@ -1,0 +1,22 @@
+[Unit]
+Description=DonkeyWork Desktop console capture (profile selected)
+PartOf=donkeywork-desktop.target
+After=network-online.target display-manager.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+UMask=0077
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/python3 /opt/donkeywork-desktop/current/libexec/package-runner.py capture
+Restart=always
+RestartSec=2
+TimeoutStopSec=12
+KillMode=control-group
+RuntimeDirectory=donkeywork-desktop-capture
+RuntimeDirectoryMode=0700
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=no

@@ -1,5 +1,19 @@
 # Architecture and open decisions
 
+## Current state and next boundary
+
+The fixed-profile `.8` alpha is complete on office1–3, Spark, Easternkingdoms
+and minigpu: each has a local daemon with H.264 display and guarded input. The
+browser prototype is intentionally internal and unauthenticated. The next
+implementation milestone is [M2 — authenticated fleet web console](milestones/M2-fleet-web-console.md).
+It adds the broker, Keycloak, enrollment and fleet session lifecycle without
+changing the device capture/input contract. Automatic physical/VKMS switching
+is separately queued in WP10.
+
+## Accepted headless POC target
+
+Andrew selected a dedicated local account and Xorg dummy-driver desktop on Spark for the first proof. See [session decision](decisions-headless-poc.md). This supersedes physical-console targeting for the current POC: actual virtual RandR mode changes are required; physical-console/Wayland validation is deferred, not passed. No console login or autologin is required. Username/password-selected PAM sessions are future work, not part of this fixed-identity POC.
+
 ## Boundaries
 
 ### M1a decision — supersedes browser-first sequencing
@@ -12,7 +26,7 @@ Capture supplies one canonical native framebuffer source for still PNGs now and 
 
 M1a targets X11 with RandR mode support, not generic Wayland. Spark is only a proposed pilot. Read-only mode inventory and mutating mode-switch tests are distinct tasks; neither lab access nor display changes are authorized by delegation. M1a completion requires real hardware evidence, not fixtures.
 
-### M1b broker/browser route
+### M2 broker/browser route
 
 Browser UI -> browser-session/browser-terminal packages -> authenticated broker attachment -> device worker. The local worker connection is a Unix-domain socket; a future remote adapter must preserve the same authorization semantics.
 
@@ -26,7 +40,7 @@ M1's reference security route redeems a one-use attachment grant through the aut
 - IPC control: length-prefixed UTF-8 JSON.
 - Exact draft contract: 0.1.0. An implementation cannot silently accept a different version.
 - Capture/encode library and media transport are not selected by schema presence.
-- M1b full-display video; no hybrid PNG/video rectangle compositor. M1a PNG stills are not a video codec.
+- M2 full-display video; no hybrid PNG/video rectangle compositor. M1a PNG stills are not a video codec.
 - Lossless convergence remains a quality option if baseline video fails; 4:4:4 is not lossless.
 - No B-frame/reordered-frame support in v0: decode and presentation order must match.
 - Local physical input is outside the broker lease. Remote takeover does not prevent a person using the device keyboard.

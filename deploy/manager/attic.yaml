@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: donkeywork-desktop
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: donkeywork-desktop
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: nfs-client
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: donkeywork-desktop
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: {app: desktop-postgres}
+  template:
+    metadata:
+      labels: {app: desktop-postgres}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: postgres
+          image: postgres:17-bookworm
+          env:
+            - {name: POSTGRES_DB, value: desktops}
+            - {name: POSTGRES_USER, value: desktops}
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: manager-secrets, key: postgres-password}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {cpu: '1', memory: 1Gi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          readinessProbe:
+            exec: {command: [pg_isready, -U, desktops, -d, desktops]}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/postgresql/data}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: postgres-data}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: donkeywork-desktop
+spec:
+  selector: {app: desktop-postgres}
+  ports:
+    - {port: 5432, targetPort: 5432}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manager
+  namespace: donkeywork-desktop
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app: desktop-manager}
+  template:
+    metadata:
+      labels: {app: desktop-manager}
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector: {kubernetes.io/hostname: chaos}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: manager
+          image: docker.io/library/dwdesktop-manager:preview-20260912.5
+          imagePullPolicy: Never
+          args:
+            - --listen=0.0.0.0:8443
+            - --origin=https://192.168.10.11:30443
+            - --tls-cert=/secrets/server.crt
+            - --tls-key=/secrets/server.key
+            - --device-ca-cert=/secrets/device-ca.crt
+            - --device-ca-key=/secrets/device-ca.key
+            - --enrollment-secret-file=/secrets/enrollment-secret
+            - --web-root=/app/web
+            - --device-listen=0.0.0.0:8444
+            - --device-url=wss://192.168.10.11:30444/connect
+            - --media-listen=0.0.0.0:30445
+            - --media-ip=192.168.10.11
+          env:
+            - {name: PGHOST, value: postgres}
+            - {name: PGDATABASE, value: desktops}
+            - {name: PGUSER, value: desktops}
+            - {name: PGSSLMODE, value: disable}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef: {name: manager-secrets, key: postgres-password}
+          ports:
+            - {name: https, containerPort: 8443}
+            - {name: device, containerPort: 8444}
+            - {name: media, containerPort: 30445, protocol: UDP}
+          readinessProbe:
+            tcpSocket: {port: https}
+          livenessProbe:
+            tcpSocket: {port: https}
+            initialDelaySeconds: 20
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: '1', memory: 256Mi}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: secrets, mountPath: /secrets, readOnly: true}
+            - {name: trust, mountPath: /app/web/downloads/manager-ca.crt, subPath: manager-ca.crt, readOnly: true}
+      volumes:
+        - name: trust
+          configMap: {name: manager-preview-trust}
+        - name: secrets
+          secret: {secretName: manager-secrets, defaultMode: 0440}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: manager
+  namespace: donkeywork-desktop
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector: {app: desktop-manager}
+  ports:
+    - {name: https, port: 8443, targetPort: https, nodePort: 30443}
+    - {name: device, port: 8444, targetPort: device, nodePort: 30444}
+    - {name: media, port: 30445, targetPort: media, nodePort: 30445, protocol: UDP}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: manager-lan-only
+  namespace: donkeywork-desktop
+spec:
+  podSelector:
+    matchLabels: {app: desktop-manager}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock: {cidr: 192.168.0.0/16}
+      ports:
+        - {protocol: TCP, port: 8443}
+        - {protocol: TCP, port: 8444}
+        - {protocol: UDP, port: 30445}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-manager-only
+  namespace: donkeywork-desktop
+spec:
+  podSelector:
+    matchLabels: {app: desktop-postgres}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: desktop-manager}
+      ports:
+        - {protocol: TCP, port: 5432}

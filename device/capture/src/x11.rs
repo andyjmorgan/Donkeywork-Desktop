@@ -22,6 +22,7 @@ pub struct X11Backend {
     pub(crate) connection: RustConnection<crate::transport::DeadlineStream>,
     pub(crate) root: u32,
     pub(crate) limits: FrameLimits,
+    pub(crate) display_name: Option<String>,
     screen: usize,
     pub(crate) topology: Topology,
     pub(crate) config_timestamp: u32,
@@ -70,6 +71,7 @@ impl X11Backend {
             root,
             screen,
             limits: options.limits,
+            display_name: options.display,
             topology: Topology {
                 revision: 0,
                 displays: Vec::new(),
@@ -574,6 +576,10 @@ fn button_code(button: Button) -> u8 {
         Button::Left => 1,
         Button::Middle => 2,
         Button::Right => 3,
+        Button::WheelUp => 4,
+        Button::WheelDown => 5,
+        Button::WheelLeft => 6,
+        Button::WheelRight => 7,
     }
 }
 pub(crate) fn pointer_coordinates(display: &Display, x: u32, y: u32) -> Result<(i16, i16)> {

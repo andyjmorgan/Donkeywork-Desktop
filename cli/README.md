@@ -39,10 +39,18 @@ cli/target/debug/dwdesktop --socket /run/dwdesktop/agent.sock --server-uid 1000 
 cli/target/debug/dwdesktop --socket /run/dwdesktop/agent.sock --server-uid 1000 close --context ./session.json
 ```
 
-`key --usage 40` sends HID Enter down/up under one lease. `text` reads bounded
+`key --usage 40` sends HID Enter down/up under one lease. Add `--modifiers alt`
+for Alt+key, `--modifiers ctrl,shift` for a chord, or repeat `--modifier ctrl
+--modifier shift`. Modifiers map to left Ctrl/Shift/Alt/Super (HID 224–227), go
+down before the key and up in reverse order afterward. For example,
+`key --context ./session.json --snapshot ./snapshot-2.json --usage 59 --modifiers alt`
+sends Alt+F2 through daemon desktop input. Chords keep one lease and contiguous
+input sequences; failure closes the connection so the daemon releases held input,
+without replaying uncertain events. Duplicate modifiers/key overlap are rejected.
+`text` reads bounded
 UTF-8 from stdin, never a password/text argument. It sends exactly what it reads,
-including any final newline. It does not print text. Full key chords and long
-script transactions are not implemented in this first slice.
+including any final newline. It does not print text. Long script transactions
+are not implemented in this first slice.
 
 Take a fresh screenshot after any resize and use that new metadata for input.
 The server enforces snapshot retention and current topology; a local JSON file

@@ -1,12 +1,56 @@
 # DonkeyWork Desktop
 
+> Retired lab experiment — September 13, 2026. The user ended this rollout after
+> repeated console/session stability failures. Desktop agents and legacy pilots
+> have been removed from all six desktop hosts. Earlier success and deployment
+> statements below are historical, not current service availability or acceptance.
+> See [retirement and cleanup](docs/validation/retirement-2026-09-13.md).
+
+> Manager milestone (2026-09-10): [internal Go/PostgreSQL design](docs/milestones/M3-internal-manager.md)
+> and [first enrollment implementation](manager/README.md). No Keycloak or public
+> access in this milestone. This supersedes the older .NET/Keycloak manager plan.
+
+> Current direction (2026-09-09): managed terminal-services desktops, initially
+> Ubuntu Spark and Minigpu. See [the runnable pilot](deploy/managed/README.md)
+> and [its explicit limits](contracts/managed-session-poc.md). The historical
+> physical-console/fleet completion claims below are not current acceptance.
+
 Linux console and terminal access, starting with an authenticated agent CLI and followed by an original Keycloak-authenticated web console.
 
-**Status: initial Rust daemon, X11 backend and CLI implemented; integration and Spark validation underway. PTY and browser are not yet integrated.**
+**Current console alpha:** Spark X11, Easternkingdoms Intel KMS and
+minigpu/office Rocky VKMS stream H.264 to the browser with guarded keyboard/mouse
+and shared CLI input. See the [fleet rollout evidence](docs/validation/fleet-alpha-rollout.md)
+for per-host versions and actual verification. Full login/logout, hotplug and
+fleet-wide reboot acceptance are separate; no fleet auth/broker is integrated.
 
-M1a proves a Rust daemon and local Unix-socket CLI on one X11 pilot: native-4K PNG screenshots, clicks/keyboard input, actual live resolution changes and a real PTY. Explicit peer-UID policy authorizes access; no broker, browser or public endpoint is needed for that first slice. M1b adds the .NET broker, Keycloak and browser streaming, including mandatory live resolution changes from the UI. Move the broker to attic and enroll the fleet only after this engine is proven.
+The working console is consolidated here: Rust `device/console/`, Go
+`console-web/`, and React `console-ui/`. The older `web/` remains a demo;
+do not deploy it over the live assets. Build a native, versioned lab bundle
+with `bash packaging/build.sh`; see [installation and profiles](packaging/README.md).
+No sibling worktree is required.
+
+Native bundles now exist for amd64 and ARM64. See the
+[minigpu package migration](docs/validation/minigpu-package-migration-2026-09-06.md),
+[Rocky prerequisites](docs/validation/rocky-package-readiness-2026-09-06.md), and
+[Spark ARM64 build](docs/validation/spark-package-build-2026-09-06.md).
+The `.8` fleet remains the validated baseline; `.9` adds browser wheel input
+end-to-end and is ready for service-only rollout. Earlier artifacts are
+superseded. Target-host boot and login
+acceptance are tracked individually, not inferred across the fleet.
+
+M1a and the fixed-profile `.8` alpha are complete. The local daemon, H.264
+browser view and real input are proven on the current six-host fleet. The next
+milestone is the authenticated fleet web console: Keycloak OAuth/OIDC, device
+enrollment and online status, plus session create/view/control/destroy. The
+broker will move to attic after local acceptance; keep the portal internal or
+behind UniFi VPN while auth and fleet policy are validated.
 
 ## Start here
+
+- [Web console start and existing DonkeyWork theme references](docs/web-console-start.md)
+- [Run the local web-console preview](web/README.md) — `npm --prefix web ci`, then `npm --prefix web run dev`; no live broker connection yet.
+
+- [Accepted headless POC and future login model](docs/decisions-headless-poc.md)
 
 - [Project brief](docs/project-brief.md)
 - [Architecture and decisions](docs/architecture.md)

@@ -1,0 +1,46 @@
+import {chromium,expect} from '@playwright/test';
+import {readFileSync,mkdtempSync,mkdirSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {createHash,X509Certificate} from 'node:crypto';
+const base=process.env.MANAGER_TEST_ORIGIN;
+const certPath=process.env.MANAGER_TEST_SERVER_CERT;
+if(base!=='https://192.168.10.11:30443'||!certPath)throw Error('explicit attic preview origin and certificate required');
+// Trust only this explicitly supplied server key, not arbitrary TLS errors.
+const leaf=new X509Certificate(readFileSync(certPath));
+const pin=createHash('sha256').update(leaf.publicKey.export({type:'spki',format:'der'})).digest('base64');
+const temp=mkdtempSync(join(tmpdir(),'dwdesktop-enroll-proof-'));
+execFileSync('openssl',['req','-new','-newkey','ec','-pkeyopt','ec_paramgen_curve:P-256','-nodes','-keyout',join(temp,'device.key'),'-out',join(temp,'device.csr'),'-subj','/CN=untrusted-request-name'],{stdio:'ignore'});
+const csrPEM=readFileSync(join(temp,'device.csr'),'utf8');
+const browser=await chromium.launch({executablePath:'/home/localuser/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome',headless:true,args:[`--ignore-certificate-errors-spki-list=${pin}`]});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base);await expect(page.getByRole('heading',{name:'Devices',exact:true})).toBeVisible();
+ await page.getByLabel('Device name').fill('Attic enrollment verification');
+ await page.getByLabel('Description').fill('Automated registration proof; revoked after testing. Not a connected device.');
+ await page.getByRole('button',{name:'Create device',exact:true}).click();
+ const code=page.getByTestId('enrollment-code');await expect(code).toHaveText(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+ const original=await code.textContent();
+ const row=page.locator('article').filter({has:page.getByRole('heading',{name:'Attic enrollment verification',exact:true})}).last();
+ const id=await row.getAttribute('data-device-id');
+ await page.reload();await expect(page.getByTestId('enrollment-code')).toHaveCount(0);
+ page.on('dialog',d=>d.accept());
+ await page.locator(`[data-device-id="${id}"]`).getByRole('button',{name:'New code'}).click();
+ await expect(code).toBeVisible();const replacement=await code.textContent();if(original===replacement)throw Error('code did not change');
+ const post=async(path,body)=>page.evaluate(async({path,body})=>{const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return {status:r.status,body:await r.json()}},{path,body});
+ if((await post('/api/v1/enroll',{code:original,csrPEM})).status!==403)throw Error('old code accepted');
+ const claim=await post('/api/v1/enroll',{code:replacement,csrPEM});if(claim.status!==201||claim.body.deviceId!==id)throw Error('claim failed');
+ const certificate=new X509Certificate(claim.body.certificatePEM),ca=new X509Certificate(claim.body.deviceCAPEM);
+ if(!certificate.verify(ca.publicKey)||!certificate.subject.includes(id))throw Error('certificate invalid');
+ if((await post('/api/v1/enroll',{code:replacement,csrPEM})).status!==403)throw Error('consumed code reused');
+ await expect(page.locator(`[data-device-id="${id}"]`)).toContainText('Offline',{timeout:12000});
+ await expect(page.getByTestId('enrollment-code')).toHaveCount(0);
+ await page.locator(`[data-device-id="${id}"]`).getByRole('button',{name:'Revoke',exact:true}).click();
+ await expect(page.locator(`[data-device-id="${id}"]`)).toContainText('Revoked');
+ if(await page.getByRole('button',{name:'Dismiss',exact:true}).count())await page.getByRole('button',{name:'Dismiss',exact:true}).click();
+ mkdirSync('artifacts/manager-proof',{recursive:true});await page.screenshot({path:'artifacts/manager-proof/attic-manager.png'});
+ if(errors.length)throw Error(errors.join('\n'));
+ console.log(JSON.stringify({origin:base,deviceId:id,create:true,regenerate:true,claim:true,replayRejected:true,revoke:true,codeNotPersistedInUI:true,browserErrors:0}));
+}finally{await browser.close()}

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Firefox
+Comment=Web Browser
+Exec=/opt/firefox/firefox --no-remote %u
+Icon=/opt/firefox/browser/chrome/icons/default/default128.png
+Terminal=false
+Categories=Network;WebBrowser;
+MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true

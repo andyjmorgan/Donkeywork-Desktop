@@ -1,0 +1,2 @@
+# Pilot: prefer the software display for monitorless GNOME console access.
+SUBSYSTEM=="drm", KERNEL=="card[0-9]*", ENV{DEVTYPE}=="drm_minor", ENV{ID_PATH}=="platform-vkms", TAG-="mutter-device-ignore"

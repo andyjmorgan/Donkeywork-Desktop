@@ -1,5 +1,14 @@
 # Local agent CLI contract — 0.2.0 (M1a)
 
+Managed-X11 pilot amendment (2026-09-09): `input.pointer` accepts
+`wheel_up`, `wheel_down`, `wheel_left`, `wheel_right` only with `action=click`.
+One click is one complete X11 wheel detent (buttons 4–7), never held input.
+The schema enumerates these names; the backend rejects down/up for them.
+See `fixtures/local-wheel.json` and contract/backend tests. Other backends and
+older core builds do not implicitly support this draft extension. The managed
+web adapter converts bounded browser wheel deltas into separately sequenced
+clicks with the existing lease/snapshot/topology checks; it never replays them.
+
 This is an original, separate local protocol: `dwdesktop.local` version `0.2.0`. It does not amend or replace the M1b broker/browser draft `0.1.0`. Its schema is `schemas/local-cli.schema.json`, examples are `fixtures/local-cli.json`, and executable invariants are in `local-cli-model.mjs`. Passing these tests is not runtime authentication, capture or OS validation.
 
 ## Trust boundary

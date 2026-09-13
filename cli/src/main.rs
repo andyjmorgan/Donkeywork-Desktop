@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use donkeywork_desktop_cli::{
     private_create, private_read, snapshot, write_private, Client, Context, Failure, Result,
 };
@@ -68,6 +68,9 @@ enum Command {
         snapshot: PathBuf,
         #[arg(long, value_parser=clap::value_parser!(u16).range(1..=255))]
         usage: u16,
+        /// Hold modifiers around the key; comma-separated or repeat --modifier.
+        #[arg(long, alias = "modifier", value_enum, value_delimiter = ',')]
+        modifiers: Vec<Modifier>,
     },
     /// Read Unicode text only from stdin, never from command-line arguments.
     Text {
@@ -98,6 +101,24 @@ enum Command {
         #[arg(long)]
         context: PathBuf,
     },
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, ValueEnum)]
+enum Modifier {
+    Ctrl,
+    Alt,
+    Shift,
+    Super,
+}
+impl Modifier {
+    fn usage(self) -> u16 {
+        match self {
+            Self::Ctrl => 224,
+            Self::Shift => 225,
+            Self::Alt => 226,
+            Self::Super => 227,
+        }
+    }
 }
 
 fn load_context(path: &Path, args: &Args) -> Result<Context> {
@@ -233,17 +254,48 @@ fn run(args: &Args) -> Result<()> {
             context,
             snapshot: path,
             usage,
+            modifiers,
         } => {
             let c = load_context(context, args)?;
             let s = snapshot(path, &c)?;
+            let mut modifier_usages = Vec::new();
+            for modifier in modifiers {
+                let modifier_usage = modifier.usage();
+                if modifier_usages.contains(&modifier_usage) || modifier_usage == *usage {
+                    return Err(Failure::new(
+                        "invalid_argument",
+                        "Duplicate modifier or modifier/key overlap is not allowed.",
+                    ));
+                }
+                modifier_usages.push(modifier_usage);
+            }
             let reply = client.controlled(&c, |client, lease| {
-                let mut p = input_payload(&s, lease, 1);
-                p["usage"] = json!(usage);
-                p["action"] = json!("down");
-                client.call("input.key", p.clone(), Some(&c), "ack")?;
-                p["inputSequence"] = json!(2);
-                p["action"] = json!("up");
-                client.call("input.key", p, Some(&c), "ack")
+                let events = modifier_usages
+                    .iter()
+                    .map(|u| (*u, "down"))
+                    .chain([(*usage, "down"), (*usage, "up")])
+                    .chain(modifier_usages.iter().rev().map(|u| (*u, "up")));
+                let mut last_reply = None;
+                let mut renewed = std::time::Instant::now();
+                for (index, (key, action)) in events.enumerate() {
+                    if renewed.elapsed() >= std::time::Duration::from_secs(15) {
+                        client.call(
+                            "control.renew",
+                            json!({"leaseId":lease}),
+                            Some(&c),
+                            "control.granted",
+                        )?;
+                        renewed = std::time::Instant::now();
+                    }
+                    let mut p = input_payload(&s, lease, index as u64 + 1);
+                    p["usage"] = json!(key);
+                    p["action"] = json!(action);
+                    // Any failure closes the connection in Client::call, invoking
+                    // daemon disconnect cleanup. Never send/replay more chord events
+                    // after ambiguous delivery. Success releases modifiers in reverse.
+                    last_reply = Some(client.call("input.key", p, Some(&c), "ack")?);
+                }
+                Ok(last_reply.expect("every key chord contains a down/up pair"))
             })?;
             output(&reply.header)
         }

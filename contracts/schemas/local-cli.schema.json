@@ -851,7 +851,11 @@
                 "none",
                 "left",
                 "middle",
-                "right"
+                "right",
+                "wheel_up",
+                "wheel_down",
+                "wheel_left",
+                "wheel_right"
               ]
             }
           }

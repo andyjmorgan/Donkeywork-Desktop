@@ -1,0 +1,23 @@
+[Unit]
+Description=DonkeyWork Desktop internal console viewer
+PartOf=donkeywork-desktop.target
+After=network-online.target display-manager.service donkeywork-desktop-capture.service donkeywork-desktop-broker.service donkeywork-desktop-input.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+UMask=0077
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/bin/python3 /opt/donkeywork-desktop/current/libexec/package-runner.py web
+Restart=always
+RestartSec=2
+TimeoutStopSec=12
+KillMode=control-group
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+# Keep the pilot's network sandbox here: on minigpu systemd's address-family
+# filter combined with User=root denies the launcher's required setuid drop.
+# The launcher still drops all groups/UID/GID before executing the web bridge.

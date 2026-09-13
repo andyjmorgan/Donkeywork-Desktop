@@ -1,8 +1,24 @@
 # Parallel work packages
 
-M1a proves a local authenticated Rust daemon plus agent CLI on one Linux X11 host: native-4K screenshots, coordinate clicks, keyboard/text input, actual live resolution changes and a real PTY. It requires no .NET broker, Keycloak, browser, remote CLI authentication or video encoding. M1b adds browser video, the .NET broker, Keycloak and original web console around that same capture/input backend. No implementation APIs are claimed to exist yet.
+## Current roadmap
 
-Both stages require actual display mode changes `3840×2160 → 1920×1080 → 3840×2160` without reopening the desktop session or disrupting its PTY. M1a drives this through the CLI; M1b through the web UI. Scaling a screenshot, video or browser is insufficient. Unsupported pilot mode switching blocks acceptance.
+- **M2 — Authenticated fleet web console (next):** Keycloak OAuth/OIDC login,
+  enrollment, online status and session lifecycle for all installed daemons.
+  See [M2 brief](../milestones/M2-fleet-web-console.md).
+
+## Current console follow-up queue
+
+- [WP10 — Automatic physical-display/VKMS switching](WP10-display-hotplug.md):
+  required after fixed-profile packaging; moving JetKVM between Easternkingdoms
+  and minigpu must move their existing consoles between physical and virtual
+  outputs. Queued, not implemented or validated.
+
+M1a and the fixed-profile `.8` alpha are complete. The local daemon, H.264
+browser view and real input are proven on the current six-host fleet. M2 now
+adds brokered OAuth/OIDC and fleet lifecycle; no public endpoint is implied by
+the existing local prototype.
+
+M1a and M2 require actual display mode changes `3840×2160 → 1920×1080 → 3840×2160` without reopening the desktop session or disrupting its PTY. M1a drives this through the CLI; M2 through the authenticated web UI. Scaling a screenshot, video or browser is insufficient. Unsupported live mode switching blocks acceptance.
 
 Read the [architecture review](../reviews/2026-09-06-m1a-architecture-review.md) for findings. The selected response is local-only M1a; the review's remote OAuth/HTTP phase and suggested timing/payload values are proposals, not additional M1a requirements. The integrator's [local CLI contract](../../contracts/local-cli.md), draft v0.2.0, defines the selected profile and limits.
 
@@ -20,29 +36,29 @@ Use separate worktrees and `work/wpXX-name` branches. One owner writes each path
 | [WP02](WP02-capture-encode.md) | M1a capture/stills/input; M1b video | `device/capture/` | Capture interface; WP01/WP09 for live proof |
 | [WP09](WP09-agent-cli.md) | M1a | `cli/` | Local CLI contract; WP01/WP02/WP05 for live proof |
 | [WP05](WP05-terminal.md) | M1a daemon PTY; M1b browser | `device/terminal/`, `browser-terminal/` | Local terminal auth/profile contract; WP01/WP09 first |
-| [WP07](WP07-integration-acceptance.md) | M1a gate, then M1b gate | `tests/integration/`, `tests/performance/`, `tests/security/`, `docs/validation/` | WP01/WP02/WP05/WP09 for M1a; WP03/WP04/WP06 additionally for M1b |
-| [WP03](WP03-browser-session.md) | M1b deferred | `browser-session/` | Proven capture source, media transport/API amendments and WP04 |
-| [WP04](WP04-broker-auth.md) | M1b deferred | `broker/` | Explicit broker HTTP/auth/IPC boundary contracts |
-| [WP06](WP06-web-console.md) | M1b deferred | `web/` | Approved browser-session/terminal package APIs and broker HTTP API |
+| [WP07](WP07-integration-acceptance.md) | M1a complete; M2 gate | `tests/integration/`, `tests/performance/`, `tests/security/`, `docs/validation/` | WP03/WP04/WP05/WP06 for M2 |
+| [WP03](WP03-browser-session.md) | M2 | `browser-session/` | Proven capture source, media transport/API amendments and WP04 |
+| [WP04](WP04-broker-auth.md) | M2 | `broker/` | Explicit broker HTTP/auth/IPC boundary contracts |
+| [WP06](WP06-web-console.md) | M2 | `console-ui/`, `console-web/` | Approved broker HTTP API and browser media/input APIs |
 | [WP08](WP08-future-design.md) | Future design only | `docs/future/` | Proven M1a/M1b boundaries; no implementation |
 
-Three initial lanes: **WP01 daemon core**, **WP02 capture/still/input**, **WP09 CLI**. They can use approved fixtures until the interfaces connect. WP05 PTY comes next, while WP07 prepares independent acceptance. WP03/WP04/WP06 and the video/browser halves of WP02/WP05 are deferred to M1b. WP08 does not block either gate.
+The `.8` device plane is complete. M2 lanes are **WP04 broker/auth/enrollment**, **WP03 browser session/media**, **WP06 fleet UI**, **WP05 browser terminal**, and **WP07 integration/acceptance**. They may use approved fixtures until the interfaces connect, but fixture success never establishes live auth or fleet interoperability. WP08 does not block M2.
 
 M1a authentication uses verified Unix peer UID, an explicit allowlist, service-owned socket permissions and a fixed permission/account profile. The CLI cannot submit a principal or access raw broker-only IPC. Topology/screenshot reads require `desktop.view` but no control lease; input and actual resize require permission plus the current lease and topology validation. Browser grants and stream generations do not belong to M1a.
 
 ## GitHub ledger
 
-[M1a — Agent CLI and Linux daemon](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/1) and [M1b — Live browser desktop](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/2) track the split. No implementation owners are assigned automatically.
+[M1a — Agent CLI and Linux daemon](https://github.com/andyjmorgan/Donkeywork-Desktop/milestone/1) is complete. M2 tracks the authenticated fleet console work; no implementation owners are assigned automatically.
 
 | Work package | Issue |
 | --- | --- |
 | WP01 — M1a device core | [#1](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/1) |
 | WP02 — M1a capture/still/input; M1b video | [#2](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/2) |
-| WP03 — M1b browser session | [#3](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/3) |
-| WP04 — M1b broker/auth | [#4](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/4) |
+| WP03 — M2 browser session | [#3](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/3) |
+| WP04 — M2 broker/auth | [#4](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/4) |
 | WP05 — M1a PTY; M1b browser terminal | [#5](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/5) |
-| WP06 — M1b web console | [#6](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/6) |
-| WP07 — M1a/M1b acceptance | [#7](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/7) |
+| WP06 — M2 web console | [#6](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/6) |
+| WP07 — M1a/M2 acceptance | [#7](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/7) |
 | WP08 — Future design | [#8](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/8) |
 | WP09 — M1a agent CLI | [#9](https://github.com/andyjmorgan/Donkeywork-Desktop/issues/9) |
 

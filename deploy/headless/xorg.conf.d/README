@@ -1,0 +1,2 @@
+Intentionally empty Xorg configuration directory. The explicit dummy configuration
+and AutoAddGPU/AutoAddDevices=false prevent this session adopting physical devices.

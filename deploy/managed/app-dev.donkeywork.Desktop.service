@@ -1,0 +1,13 @@
+[Unit]
+Description=DonkeyWork existing Wayland desktop portal adapter
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/lib/dwdesktop/session-agent serve --restore-file %h/.local/state/dwdesktop-console/restore --socket %h/.local/state/dwdesktop-console/console.sock --provision-if-missing --timeout 45s
+UMask=0077
+KillMode=control-group
+TimeoutStopSec=10
+Restart=no
+NoNewPrivileges=yes

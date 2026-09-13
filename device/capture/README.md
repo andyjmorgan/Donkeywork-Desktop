@@ -56,3 +56,11 @@ cargo clippy --manifest-path device/capture/Cargo.toml --all-targets -- -D warni
 Tests use synthetic image buffers, Unix socket pairs and fake mode transactions. The native 3840×2160 PNG round-trip is byte-exact synthetic evidence, not proof of hardware capture, encode throughput, input latency or monitor behaviour. No X server is contacted by tests. Physical corner-click accuracy, Spark compatibility, live 4K→1080p→4K rollback and PTY continuity require the authorized integration run.
 
 No browser video, terminal implementation, daemon installation, Keycloak or fleet deployment is included.
+
+### Resize diagnostics
+
+`cargo build --release --manifest-path device/capture/Cargo.toml --example resize-preflight` builds a read-only X11/RandR query tool. An authorized host operator can run it with the dedicated service DISPLAY/XAUTHORITY under `timeout 15s`. It reports CRTC/output/resource/geometry/legacy-screen query stages; it never captures pixels, injects input or changes modes.
+
+For a resize failure that passes preflight, the operator may temporarily set `DW_DESKTOP_RESIZE_TRACE=1` on the daemon service. Only resize error stages and local X11 protocol errors are emitted to stderr; no input/image/session bodies are logged. Diagnostics are disabled by default. Remove the setting after investigation.
+
+The pilot exposed an x11rb decoding failure for legacy RandR `GetScreenInfo` (the same query succeeds with libXrandr). Production resize no longer depends on that legacy rates reply. It opens a short authenticated connection to the same local X server to obtain current root pixel/millimeter dimensions from the setup handshake, validates those against current `GetGeometry`, and preserves the returned physical dimensions for rollback. The original long-lived setup is deliberately not reused after a previous resize. The read-only preflight example retains the legacy query to reproduce the original failure.

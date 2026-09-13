@@ -1,0 +1,7 @@
+[Unit]
+Description=DonkeyWork Desktop console pilot
+Wants=network-online.target donkeywork-desktop-capture.service donkeywork-desktop-broker.service donkeywork-desktop-web.service donkeywork-desktop-session-supervisor.service
+After=network-online.target display-manager.service
+
+[Install]
+WantedBy=multi-user.target

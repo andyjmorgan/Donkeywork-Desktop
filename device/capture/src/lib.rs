@@ -72,6 +72,10 @@ pub enum Button {
     Left,
     Middle,
     Right,
+    WheelUp,
+    WheelDown,
+    WheelLeft,
+    WheelRight,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PointerAction {
